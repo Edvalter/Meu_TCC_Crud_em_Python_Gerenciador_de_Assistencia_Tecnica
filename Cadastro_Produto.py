@@ -39,7 +39,9 @@ from tkinter import ttk
 from tkcalendar import Calendar, DateEntry
 from view import *
 import view
-import sqlite3
+import mysql.connector
+from mysql.connector import Error
+
 
 # Configuração das Cores
 
@@ -72,7 +74,7 @@ class Funcao():
         self.e_produto.focus()
 
     def conecta_bd(self):
-        self.conn = sqlite3.connect('gerenciador.db')
+        self.conn = mysql.connector.connect(host='localhost', database='gerenciador', user='root', password='admin')
         self.cursor = self.conn.cursor()
 
     def desconecta_bd(self):
@@ -82,18 +84,19 @@ class Funcao():
         self.conecta_bd()
         self.cursor.execute("""
                 CREATE TABLE IF NOT EXISTS cad_produto(
-                id_produto INTEGER PRIMARY KEY AUTOINCREMENT,
+                id_produto INTEGER AUTO_INCREMENT,
                 produto VARCHAR(100) NOT NULL,
                 marca VARCHAR(100) NOT NULL,
                 modelo VARCHAR(100) NOT NULL,
                 cor VARCHAR(100),
                 valor_compra FLOAT,
                 valor_venda FLOAT,
-                estoque INTEGER
+                estoque INTEGER,
+                PRIMARY KEY (id_produto)
             );
         """)
 
-        self.conn.commit();
+        self.conn.commit()
         self.desconecta_bd()
 
     def produtos_Variaveis(self):
@@ -112,20 +115,16 @@ class Funcao():
             messagebox.showerror(title="Cadastro de Produto", message="Campos Vazios")
         else:
             self.conecta_bd()
-            self.cursor.execute(
-                """ INSERT INTO 
-                    cad_produto (produto, marca, modelo, cor, valor_compra, valor_venda, estoque)
+            self.cursor.execute("""
+                INSERT INTO
+                    cad_produto 
+                        (produto, marca, modelo, cor, valor_compra, valor_venda, estoque) 
                 VALUES 
-                    (?, ?, ?, ?, ?, ?, ?);""", (
-                     self.produto,
-                     self.marca,
-                     self.modelo,
-                     self.cor,
-                     self.valor_compra,
-                     self.valor_venda,
-                     self.estoque))
+                        (%s, %s, %s, %s, %s, %s, %s);""",
+                        (self.produto, self.marca, self.modelo, self.cor, self.valor_compra, self.valor_venda, self.estoque))
 
             messagebox.showinfo(title="Cadastrado de Produto", message="Produto Cadastro com Sucesso")
+
         self.conn.commit()
         self.desconecta_bd()
         self.select_Produto()
@@ -140,8 +139,12 @@ class Funcao():
             ORDER BY 
                 marca 
             ASC; """)
+
+        lista = self.cursor.fetchall()
+
         for i in lista:
             self.listaproduto.insert("", END, values=i)
+
         self.desconecta_bd()
 
     def duplo_Clique(self, event):
@@ -166,8 +169,8 @@ class Funcao():
             DELETE FROM 
                 cad_produto 
             WHERE
-                id_produto = ? """, (
-                self.id_produto,))
+                id_produto = %s """,
+                (self.id_produto,))
 
         self.conn.commit()
         self.desconecta_bd()
@@ -181,9 +184,9 @@ class Funcao():
             UPDATE 
                 cad_produto
             SET 
-                produto = ?, marca = ?, modelo = ?, cor = ?, valor_compra = ?, valor_venda = ?, estoque = ? 
+                produto = %s, marca = %s, modelo = %s, cor = %s, valor_compra = %s, valor_venda = %s, estoque = %s 
             WHERE 
-                id_produto = ?""", (
+                id_produto = %s""", (
                 self.produto,
                 self.marca,
                 self.modelo,

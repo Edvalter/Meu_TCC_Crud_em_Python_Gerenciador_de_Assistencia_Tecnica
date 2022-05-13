@@ -140,6 +140,8 @@ class Funcao():
                 marca 
             ASC; """)
 
+        lista = self.cursor.fetchall()
+
         for i in lista:
             self.listaproduto.insert("", END, values=i)
 
@@ -167,7 +169,7 @@ class Funcao():
             DELETE FROM 
                 cad_produto 
             WHERE
-                id_produto = ? """, (
+                id_produto = %s """, (
                 self.id_produto,))
 
         self.conn.commit()
