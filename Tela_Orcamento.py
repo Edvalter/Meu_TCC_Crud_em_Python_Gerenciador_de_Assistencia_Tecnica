@@ -27,16 +27,17 @@ co10 = "white"
 
 orcamento = Tk()
 
-class Busca_Cliente():
+
+class Funcao():
     def limpa_Tela(self):
         self.e_cpf.delete(0, END)
         self.e_nome.delete(0, END)
         self.e_whatsapp.delete(0, END)
-        self.e_aparelho.delete(0, END)
+        self.e_produto.delete(0, END)
         self.e_marca.delete(0, END)
         self.e_cor.delete(0, END)
         self.e_defeito.delete(0, END)
-        self.e_defeito.delete(0, END)
+        self.e_observacoes.delete(0, END)
 
     def conecta_bd(self):
         self.conn = mysql.connector.connect(host='localhost', database='gerenciador', user='root', password='admin')
@@ -45,20 +46,37 @@ class Busca_Cliente():
     def desconecta_bd(self):
         self.conn.close()
 
-    def seleciona(self):
-        self.listaproduto.delete(*self.listaproduto.get_children())
+    def montatabelas(self):
         self.conecta_bd()
-        lista = self.cursor.execute("""
-            SELECT * FROM 
-                cad_produto 
-            ORDER BY 
-                marca 
-            ASC; """)
+        self.cursor.execute("""
+                CREATE TABLE IF NOT EXISTS orcamento(
+                id_orcamento INT AUTO_INCREMENT,
+                id_pessoa INT(10) NOT NULL,
+                id_produto INT(10)  NOT NULL,
+                marca VARCHAR(100) NOT NULL,
+                modelo VARCHAR(100) NOT NULL,
+                cor VARCHAR(100),
+                valor_venda FLOAT,
+                PRIMARY KEY (id_orcamento)
+            );
+        """)
 
-        lista = self.cursor.fetchall()
+        self.conn.commit()
+        self.desconecta_bd()
 
-        for i in lista:
-            self.listaproduto.insert("", END, values=i)
+    def select_Pessoa(self):
+        self.lista_orcarmento.delete(*self.lista_orcarmento.get_children())
+        self.conecta_bd()
+        listaPe = self.cursor.execute("""
+             SELECT * FROM
+                 cad_pessoas 
+             ORDER BY 
+                 id_pessoas ASC; """)
+
+        listaPe = self.cursor.fetchall()
+
+        for i in listaPe:
+            self.lista_orcarmento.insert("", END, values=i)
 
         self.desconecta_bd()
 
@@ -69,7 +87,6 @@ class Busca_Cliente():
         cpf = self.e_cpf.get()
         nome = self.e_nome.get()
         whatsapp = self.e_whatsapp.get()
-
 
         if len(cpf) > 0:
             self.e_cpf.insert(END, "%")
@@ -115,6 +132,17 @@ class Busca_Cliente():
             for i in buscaWhatsapp:
                 self.lista_orcarmento.insert("", END, values=i)
 
+        self.desconecta_bd()
+
+    def duplo_Clique(self, event):
+        self.limpa_Tela()
+        self.lista_orcarmento.selection()
+
+        for n in self.lista_orcarmento.selection():
+            col1, col2, col3 = self.lista_orcarmento.item(n, 'values')
+            self.e_cpf.insert(END, col1)
+            self.e_nome.insert(END, col2)
+            self.e_whatsapp.insert(END, col3)
 
     def busca_Produto(self):
         self.conecta_bd()
@@ -190,7 +218,8 @@ class Busca_Cliente():
 
         self.desconecta_bd()
 
-class Aplicacao_Orcamento(Busca_Cliente):
+
+class Aplicacao_Orcamento(Funcao):
     def __init__(self):
         self.orcamento = orcamento
         self.tela_orcamento()
@@ -198,7 +227,7 @@ class Aplicacao_Orcamento(Busca_Cliente):
         self.labels_entry()
         self.botoes()
         self.grid_orcamento()
-        self.busca_Produto()
+        self.montatabelas()
 
         self.orcamento.mainloop()
 
@@ -209,114 +238,144 @@ class Aplicacao_Orcamento(Busca_Cliente):
 
     def frames_Orcamento(self):
         self.frame_superior = Frame(self.orcamento, bg=co4, highlightbackground=co5, highlightthickness=6)
-        self.frame_superior.place(x=10, y=10, height=200, width=1075)
+        self.frame_superior.place(x=10, y=10, height=250, width=1075)
 
         self.frame_grid = Frame(self.orcamento, bg=co10, highlightbackground=co5, highlightthickness=6)
-        self.frame_grid.place(x=10, y=230, height=200, width=1075)
+        self.frame_grid.place(x=10, y=280, height=200, width=1075)
 
         self.frame_inferior = Frame(self.orcamento, bg=co4, highlightbackground=co5, highlightthickness=6)
         self.frame_inferior.place(x=10, y=500, height=160, width=1075)
 
     def labels_entry(self):
         # - - Frame Superior - -
-
-        self.l_orcamento = Label(self.frame_superior, text="Orçamento:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
-        self.l_orcamento.place(x=5, y=10)
+        self.l_orcamento = Label(self.frame_superior, text="Orçamento:", font=("Courier", 13, "italic", "bold"), bg=co4,
+                                 fg=co10)
+        self.l_orcamento.place(x=55, y=10)
         self.e_orcamento = Entry(self.frame_superior, width=45, justify='left', relief='raised', bg=co2, fg=co10)
-        self.e_orcamento.place(x=110, y=10)
+        self.e_orcamento.place(x=160, y=10)
+
+        self.l_id_cliente = Label(self.frame_superior, text="Código Cliente:", font=("Courier", 13, "italic", "bold"),
+                                  bg=co4, fg=co10)
+        self.l_id_cliente.place(x=5, y=35)
+        self.e_id_cliente = Entry(self.frame_superior, width=45, justify='left', relief='raised', bg=co2, fg=co10)
+        self.e_id_cliente.place(x=160, y=35)
 
         self.l_cpf = Label(self.frame_superior, text="Cpf:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
-        self.l_cpf.place(x=55, y=35)
+        self.l_cpf.place(x=115, y=60)
         self.e_cpf = Entry(self.frame_superior, width=45, justify='left', relief='raised', bg=co2, fg=co10)
-        self.e_cpf.place(x=110, y=35)
+        self.e_cpf.place(x=160, y=60)
 
         self.l_nome = Label(self.frame_superior, text="Nome:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
-        self.l_nome.place(x=55, y=60)
+        self.l_nome.place(x=105, y=85)
         self.e_nome = Entry(self.frame_superior, width=45, justify='left', relief='raised', bg=co2, fg=co10)
-        self.e_nome.place(x=110, y=60)
+        self.e_nome.place(x=160, y=85)
 
-        self.l_whatsapp = Label(self.frame_superior, text="Whatsapp:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
-        self.l_whatsapp.place(x=15, y=85)
+        self.l_whatsapp = Label(self.frame_superior, text="Whatsapp:", font=("Courier", 13, "italic", "bold"), bg=co4,
+                                fg=co10)
+        self.l_whatsapp.place(x=65, y=110)
         self.e_whatsapp = Entry(self.frame_superior, width=45, justify='left', relief='raised', bg=co2, fg=co10)
-        self.e_whatsapp.place(x=110, y=85)
+        self.e_whatsapp.place(x=160, y=110)
 
-        self.l_produdo = Label(self.frame_superior, text="Produdo:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
-        self.l_produdo.place(x=15, y=110)
-        self.e_produdo = Entry(self.frame_superior, width=45, justify='left', relief='raised', bg=co2, fg=co10)
-        self.e_produdo.place(x=110, y=110)
+        self.l_produto = Label(self.frame_superior, text="Produdo:", font=("Courier", 13, "italic", "bold"), bg=co4,
+                               fg=co10)
+        self.l_produto.place(x=75, y=135)
+        self.e_produto = Entry(self.frame_superior, width=45, justify='left', relief='raised', bg=co2, fg=co10)
+        self.e_produto.place(x=160, y=135)
 
-        self.l_marca = Label(self.frame_superior, text="Marca:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
-        self.l_marca.place(x=45, y=135)
+        self.l_marca = Label(self.frame_superior, text="Marca:", font=("Courier", 13, "italic", "bold"), bg=co4,
+                             fg=co10)
+        self.l_marca.place(x=95, y=160)
         self.e_marca = Entry(self.frame_superior, width=45, justify='left', relief='raised', bg=co2, fg=co10)
-        self.e_marca.place(x=110, y=135)
+        self.e_marca.place(x=160, y=160)
+
+        self.l_modelo = Label(self.frame_superior, text="Modelo:", font=("Courier", 13, "italic", "bold"), bg=co4,
+                              fg=co10)
+        self.l_modelo.place(x=85, y=185)
+        self.e_modelo = Entry(self.frame_superior, width=45, justify='left', relief='raised', bg=co2, fg=co10)
+        self.e_modelo.place(x=160, y=185)
 
         self.l_cor = Label(self.frame_superior, text="Cor:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
-        self.l_cor.place(x=65, y=160)
+        self.l_cor.place(x=115, y=210)
         self.e_cor = Entry(self.frame_superior, width=45, justify='left', relief='raised', bg=co2, fg=co10)
-        self.e_cor.place(x=110, y=160)
+        self.e_cor.place(x=160, y=210)
 
-        self.l_defeito = Label(self.frame_superior, text="Defeito:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
-        self.l_defeito.place(x=540, y=10)
+        self.l_defeito = Label(self.frame_superior, text="Defeito:", font=("Courier", 13, "italic", "bold"), bg=co4,
+                               fg=co10)
+        self.l_defeito.place(x=615, y=10)
         self.e_defeito = Entry(self.frame_superior, width=45, justify='left', relief='solid', bg=co2, fg=co10)
-        self.e_defeito.place(x=625, y=10)
+        self.e_defeito.place(x=700, y=10)
 
-        self.l_observacoes = Label(self.frame_superior, text="Obersvações:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
-        self.l_observacoes.place(x=500, y=35)
+        self.l_observacoes = Label(self.frame_superior, text="Obersvações:", font=("Courier", 13, "italic", "bold"),
+                                   bg=co4, fg=co10)
+        self.l_observacoes.place(x=575, y=35)
         self.e_observacoes = Entry(self.frame_superior, width=45, justify='left', relief='solid', bg=co2, fg=co10)
-        self.e_observacoes.place(x=625, y=35)
+        self.e_observacoes.place(x=700, y=35)
 
-        self.l_entrada = Label(self.frame_superior, text="Entrada:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
-        self.l_entrada.place(x=540, y=60)
+        self.l_entrada = Label(self.frame_superior, text="Entrada:", font=("Courier", 13, "italic", "bold"), bg=co4,
+                               fg=co10)
+        self.l_entrada.place(x=615, y=60)
         self.e_entrada = DateEntry(self.frame_superior, width=42, justify='left', relief='solid', locale="pt_br")
-        self.e_entrada.place(x=625, y=60)
+        self.e_entrada.place(x=700, y=60)
 
-        self.l_retirada = Label(self.frame_superior, text="Retirada:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
-        self.l_retirada.place(x=530, y=85)
+        self.l_retirada = Label(self.frame_superior, text="Retirada:", font=("Courier", 13, "italic", "bold"), bg=co4,
+                                fg=co10)
+        self.l_retirada.place(x=605, y=85)
         self.e_retirada = DateEntry(self.frame_superior, width=42, justify='left', relief='solid', locale="pt_br")
-        self.e_retirada.place(x=625, y=85)
 
-# - - Frame Inferior - -
-        self.l_quantidade = Label(self.frame_inferior, text="Quantidade de Itens:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
+        self.e_retirada.place(x=700, y=85)
+
+        # - - Frame Inferior - -
+        self.l_quantidade = Label(self.frame_inferior, text="Quantidade de Itens:",
+                                  font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
         self.l_quantidade.place(x=10, y=25)
         self.e_quantidade = Entry(self.frame_inferior, width=45, justify='left', relief='solid', bg=co2, fg=co10)
         self.e_quantidade.place(x=215, y=25)
 
-        self.l_desconto = Label(self.frame_inferior, text="Desconto:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
+        self.l_desconto = Label(self.frame_inferior, text="Desconto:", font=("Courier", 13, "italic", "bold"), bg=co4,
+                                fg=co10)
         self.l_desconto.place(x=120, y=50)
-        self.e_desconto= Entry(self.frame_inferior, width=45, justify='left', relief='solid', bg=co2, fg=co10)
+        self.e_desconto = Entry(self.frame_inferior, width=45, justify='left', relief='solid', bg=co2, fg=co10)
         self.e_desconto.place(x=215, y=50)
 
-        self.l_valor = Label(self.frame_inferior, text="Valor Total:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
+        self.l_valor = Label(self.frame_inferior, text="Valor Total:", font=("Courier", 13, "italic", "bold"), bg=co4,
+                             fg=co10)
         self.l_valor.place(x=90, y=75)
         self.e_valor = Entry(self.frame_inferior, width=45, justify='left', relief='solid', bg=co2, fg=co10)
         self.e_valor.place(x=215, y=75)
 
     def botoes(self):
-
         # - - Frame Inferior - -
-        self.b_limpar = Button(self.frame_superior, text="Limpar", command=self.limpa_Tela, width=10, font=('Ivy 8 bold'), bg=co6, fg=co2, relief=RAISED, overrelief=RIDGE)
-        self.b_limpar.place(x=480, y=130, height=40, width=100)
+        self.b_limpar = Button(self.frame_superior, text="Limpar", command=self.limpa_Tela, width=10,
+                               font=('Ivy 8 bold'), bg=co6, fg=co2, relief=RAISED, overrelief=RIDGE)
+        self.b_limpar.place(x=480, y=190, height=40, width=100)
 
-        self.b_procurar = Button(self.frame_superior, text="Procurar", width=10, font=('Ivy 8 bold'), bg=co6, fg=co2, relief=RAISED, overrelief=RIDGE)
-        self.b_procurar.place(x=590, y=130, height=40, width=100)
+        self.b_procurar = Button(self.frame_superior, text="Procurar", width=10, font=('Ivy 8 bold'), bg=co6, fg=co2,
+                                 relief=RAISED, overrelief=RIDGE)
+        self.b_procurar.place(x=590, y=190, height=40, width=100)
 
-        self.b_procurarCliente = Button(self.frame_superior, text="Procurar", command=self.busca_Cliente, width=10, font=('Ivy 6 bold'), bg=co6, fg=co2, relief=RAISED, overrelief=RIDGE)
-        self.b_procurarCliente.place(x=390, y=35, height=20, width=60)
+        self.b_procurarCliente = Button(self.frame_superior, text="Procurar", command=self.busca_Cliente, width=10,
+                                        font=('Ivy 6 bold'), bg=co6, fg=co2, relief=RAISED, overrelief=RIDGE)
+        self.b_procurarCliente.place(x=440, y=35, height=20, width=60)
 
-        self.b_procurarProduto = Button(self.frame_superior, text="Procurar", command=self.busca_Produto, width=10, font=('Ivy 6 bold'), bg=co6, fg=co2, relief=RAISED, overrelief=RIDGE)
-        self.b_procurarProduto.place(x=390, y=110, height=20, width=60)
+        self.b_procurarProduto = Button(self.frame_superior, text="Procurar", command=self.busca_Produto, width=10,
+                                        font=('Ivy 6 bold'), bg=co6, fg=co2, relief=RAISED, overrelief=RIDGE)
+        self.b_procurarProduto.place(x=440, y=110, height=20, width=60)
 
-        self.b_adicionar = Button(self.frame_superior, text="Adicionar",  width=10, font=('Ivy 8 bold'), bg=co7, fg=co2, relief=RAISED, overrelief=RIDGE)
-        self.b_adicionar.place(x=700, y=130, height=40, width=100)
+        self.b_adicionar = Button(self.frame_superior, text="Adicionar", width=10, font=('Ivy 8 bold'), bg=co7, fg=co2,
+                                  relief=RAISED, overrelief=RIDGE)
+        self.b_adicionar.place(x=700, y=190, height=40, width=100)
 
-        self.b_alterar = Button(self.frame_superior, text="Alterar",  width=10, font=('Ivy 8 bold'), bg=co8, fg=co2, relief=RAISED, overrelief=RIDGE)
-        self.b_alterar.place(x=810, y=130, height=40, width=100)
+        self.b_alterar = Button(self.frame_superior, text="Alterar", width=10, font=('Ivy 8 bold'), bg=co8, fg=co2,
+                                relief=RAISED, overrelief=RIDGE)
+        self.b_alterar.place(x=810, y=190, height=40, width=100)
 
-        self.b_excluir = Button(self.frame_superior, text="Excluir",  width=10, font=('Ivy 8 bold'), bg=co9, fg=co2, relief=RAISED, overrelief=RIDGE)
-        self.b_excluir.place(x=920, y=130, height=40, width=100)
+        self.b_excluir = Button(self.frame_superior, text="Excluir", width=10, font=('Ivy 8 bold'), bg=co9, fg=co2,
+                                relief=RAISED, overrelief=RIDGE)
+        self.b_excluir.place(x=920, y=190, height=40, width=100)
 
     def grid_orcamento(self):
-        self.lista_orcarmento = ttk.Treeview(self.frame_grid, columns=("col0", "col1", "col2", "col3", "col4", "col5", "col6", "col7"))
+        self.lista_orcarmento = ttk.Treeview(self.frame_grid,
+                                             columns=("col0", "col1", "col2", "col3", "col4", "col5", "col6", "col7"))
         self.lista_orcarmento.heading("#0", text="")
         self.lista_orcarmento.heading("#1", text="CPF")
         self.lista_orcarmento.heading("#2", text="Nome")
@@ -328,16 +387,16 @@ class Aplicacao_Orcamento(Busca_Cliente):
         self.lista_orcarmento.heading("#8", text="Valor")
 
         self.lista_orcarmento.column("#0", anchor='center', width=5)
-        self.lista_orcarmento.column("#1", anchor='center', width=174)
-        self.lista_orcarmento.column("#2", anchor='center', width=174)
-        self.lista_orcarmento.column("#3", anchor='center', width=174)
-        self.lista_orcarmento.column("#4", anchor='center', width=174)
-        self.lista_orcarmento.column("#5", anchor='center', width=174)
-        self.lista_orcarmento.column("#6", anchor='center', width=174)
-        self.lista_orcarmento.column("#7", anchor='center', width=174)
-        self.lista_orcarmento.column("#8", anchor='center', width=174)
+        self.lista_orcarmento.column("#1", anchor='center', width=100)
+        self.lista_orcarmento.column("#2", anchor='center', width=132)
+        self.lista_orcarmento.column("#3", anchor='center', width=132)
+        self.lista_orcarmento.column("#4", anchor='center', width=132)
+        self.lista_orcarmento.column("#5", anchor='center', width=132)
+        self.lista_orcarmento.column("#6", anchor='center', width=132)
+        self.lista_orcarmento.column("#7", anchor='center', width=132)
+        self.lista_orcarmento.column("#8", anchor='center', width=132)
 
-        self.lista_orcarmento.place(x=10, y=10, height=160, width=1035) #height=340
+        self.lista_orcarmento.place(x=10, y=10, height=160, width=1035)
 
         self.barra_vertical = ttk.Scrollbar(self.frame_grid, orient='vertical', command=self.lista_orcarmento.yview)
         self.barra_vertical.place(x=1048, y=0, height=189, width=15)
@@ -345,6 +404,10 @@ class Aplicacao_Orcamento(Busca_Cliente):
         self.barra_horizontal = ttk.Scrollbar(self.frame_grid, orient='horizontal', command=self.lista_orcarmento.xview)
         self.barra_horizontal.place(x=0, y=174, height=15, width=1050)
 
-        self.lista_orcarmento.configure(yscrollcommand=self.barra_vertical.set, xscrollcommand=self.barra_horizontal.set)
+        self.lista_orcarmento.configure(yscrollcommand=self.barra_vertical.set,
+                                        xscrollcommand=self.barra_horizontal.set)
+
+        self.lista_orcarmento.bind("<Double-1>", self.duplo_Clique)
+
 
 Aplicacao_Orcamento()
