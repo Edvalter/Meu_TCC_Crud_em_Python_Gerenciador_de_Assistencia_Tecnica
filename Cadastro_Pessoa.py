@@ -494,22 +494,22 @@ class Aplicacao_Pessoas(Funcao_Pessoas, Relatorio):
         self.e_data_cadastro.place(x=600, y=160)
 
     def botoes_tela_pessoas(self):
-        self.b_limpar = Button(self.frame_superior_pessoas, text="Limpar", command=self.limpa_Tela_Pessoas, width=10,font=('Ivy 10 bold'), bg=co6, fg=co2, relief=RAISED, overrelief=RIDGE)
+        self.b_limpar = Button(self.frame_superior_pessoas, text="Limpar", command=self.limpa_Tela_Pessoas, width=10,font=("Courier", 13, "italic", "bold"), bg=co6, fg=co2, relief=RAISED, overrelief=RIDGE)
         self.b_limpar.place(x=280, y=200, height=40, width=100)
 
-        self.b_procurar = Button(self.frame_superior_pessoas, text="Procurar", command=self.buscar_Pessoa, width=10, font=('Ivy 10 bold'), bg=co6, fg=co2, relief=RAISED, overrelief=RIDGE)
+        self.b_procurar = Button(self.frame_superior_pessoas, text="Procurar", command=self.buscar_Pessoa, width=10, font=("Courier", 13, "italic", "bold"), bg=co6, fg=co2, relief=RAISED, overrelief=RIDGE)
         self.b_procurar.place(x=390, y=200, height=40, width=100)
 
-        self.b_adicionar = Button(self.frame_superior_pessoas, text="Adicionar", command=self.adiciona_Pessoa, width=10, font=('Ivy 10 bold'), bg=co7, fg=co2, relief=RAISED, overrelief=RIDGE)
+        self.b_adicionar = Button(self.frame_superior_pessoas, text="Adicionar", command=self.adiciona_Pessoa, width=10, font=("Courier", 13, "italic", "bold"), bg=co7, fg=co2, relief=RAISED, overrelief=RIDGE)
         self.b_adicionar.place(x=500, y=200, height=40, width=100)
 
-        self.b_alterar = Button(self.frame_superior_pessoas, text="Alterar", command=self.altera_Pessoa, width=10, font=('Ivy 10 bold'), bg=co8, fg=co2, relief=RAISED, overrelief=RIDGE)
+        self.b_alterar = Button(self.frame_superior_pessoas, text="Alterar", command=self.altera_Pessoa, width=10, font=("Courier", 13, "italic", "bold"), bg=co8, fg=co2, relief=RAISED, overrelief=RIDGE)
         self.b_alterar.place(x=610, y=200, height=40, width=100)
 
-        self.b_excluir = Button(self.frame_superior_pessoas, text="Excluir", command=self.deleta_Pessoa, width=10, font=('Ivy 10 bold'), bg=co9, fg=co2, relief=RAISED, overrelief=RIDGE)
+        self.b_excluir = Button(self.frame_superior_pessoas, text="Excluir", command=self.deleta_Pessoa, width=10, font=("Courier", 13, "italic", "bold"), bg=co9, fg=co2, relief=RAISED, overrelief=RIDGE)
         self.b_excluir.place(x=720, y=200, height=40, width=100)
 
-        self.b_imprimir = Button(self.frame_superior_pessoas, text="Imprimir", command=self.geraRelatorio, width=10, font=('Ivy 10 bold'), bg=co6, fg=co2, relief=RAISED, overrelief=RIDGE)
+        self.b_imprimir = Button(self.frame_superior_pessoas, text="Imprimir", command=self.geraRelatorio, width=10, font=("Courier", 13, "italic", "bold"), bg=co6, fg=co2, relief=RAISED, overrelief=RIDGE)
         self.b_imprimir.place(x=830, y=200, height=40, width=100)
 
     def grid_Pessoas(self):
