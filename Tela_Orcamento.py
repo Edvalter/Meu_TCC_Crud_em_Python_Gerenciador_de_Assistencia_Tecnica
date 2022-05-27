@@ -143,6 +143,8 @@ class Funcao():
             self.e_cpf.insert(END, col1)
             self.e_nome.insert(END, col2)
             self.e_whatsapp.insert(END, col3)
+            self.lista_orcamento.delete()
+
 
     def busca_Produto(self):
         self.conecta_bd()

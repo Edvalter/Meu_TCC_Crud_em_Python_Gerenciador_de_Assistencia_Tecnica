@@ -9,9 +9,16 @@ from tkinter import messagebox
 from tkinter import ttk
 from view import *
 import view
+import datetime
+from datetime import datetime as dt
 import mysql.connector
 from tkcalendar import Calendar, DateEntry
-
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.platypus import SimpleDocTemplate, Image
+import webbrowser
 
 database = "gerenciador.db"
 
@@ -28,14 +35,49 @@ co7 = "#6aabb5"  # Botão Adicionar
 co8 = "#ffff99"  # Botão Alterar
 co9 = "#d54c4a"  # botão excluir
 co10 = "white"
+LETRAS = font=('Ivy 10 bold')
 
 # - - janela Cadastro de Pessoas - -
 
 cadpessoas = Tk()
 
+class Relatorio():
+    def imprimir(self):
+        webbrowser.open("cliente.pdf")
+    def geraRelatorio(self):
+        self.c = canvas.Canvas("cliente.pdf")
+
+        self.idPessoaRelatorio = self.e_id_pessoa.get()
+        self.nomeRelatorio = self.e_nome.get()
+        self.whatsappRelatorio = self.e_whatsapp.get()
+        self.data_cadastroRelatorio = self.e_data_cadastro.get()
+
+        self.c.setFont("Helvetica-Bold", 18)
+        self.c.drawString(200, 790, 'Ficha do Cliente')
+
+        self.c.setFont("Helvetica-Bold", 12)
+        self.c.drawString(50, 700, 'Código: ')  # + self.codigoRel) se eu quiser fazer a concatenação é so colocar essa parte
+        self.c.drawString(50, 680, 'Nome: ')
+        self.c.drawString(50, 660, 'Telefone: ')
+        self.c.drawString(50, 640, 'Data do Cadastro: ')
+
+        self.c.setFont("Helvetica", 12)
+
+        self.c.drawString(110, 700, self.idPessoaRelatorio)
+        self.c.drawString(90, 680, self.nomeRelatorio)
+        self.c.drawString(110, 660, self.whatsappRelatorio)
+        self.c.drawString(160, 640, self.data_cadastroRelatorio)
+
+        self.c.rect(20, 550, 550, 5, fill=True, stroke=False)  # cria o retangulo no final da folha
+
+        self.c.showPage()
+        self.c.save()
+        self.imprimir()
+
 class Funcao_Pessoas():
+
     def limpa_Tela_Pessoas(self):
-        self.e_id_pessoas.delete(0, END)
+        self.e_id_pessoa.delete(0, END)
         self.e_cpf.delete(0, END)
         self.e_nome.delete(0, END)
         self.e_telefone.delete(0, END)
@@ -61,7 +103,7 @@ class Funcao_Pessoas():
         self.conecta_bd()
         self.cursor.execute("""
                 CREATE TABLE IF NOT EXISTS cad_pessoas(
-                id_pessoas INTEGER AUTO_INCREMENT,
+                id_pessoa INTEGER AUTO_INCREMENT,
                 cpf INTEGER,
                 nome VARCHAR(100),
                 telefone VARCHAR(100),
@@ -75,14 +117,14 @@ class Funcao_Pessoas():
                 estado VARCHAR(100),
                 observacoes VARCHAR(200),
                 data_cadastro DATE,
-                PRIMARY KEY (id_pessoas)
+                PRIMARY KEY (id_pessoa)
             );
         """)
         self.conn.commit()
         self.desconecta_bd()
 
     def pessoas_Variaveis(self):
-        self.id_pessoas = self.e_id_pessoas.get()
+        self.id_pessoa = self.e_id_pessoa.get()
         self.cpf = self.e_cpf.get()
         self.nome = self.e_nome.get()
         self.telefone = self.e_telefone.get()
@@ -96,6 +138,17 @@ class Funcao_Pessoas():
         self.estado = self.e_estado.get()
         self.observacoes = self.e_observacoes.get()
         self.data_cadastro = self.e_data_cadastro.get()
+        self.dataConvertida = self.converteData()
+        self.converteDataParaBrasil = self.converteDataParaBrasil()
+
+
+    def converteData(self):
+        dataConvertida = dt.strptime(self.data_cadastro, '%d/%m/%Y')
+        return dataConvertida
+
+    def converteDataParaBrasil(self):
+        dataConvertidaParaBrasil = dt.strptime(self.data_cadastro, '%Y-%m-%d')
+        return dataConvertidaParaBrasil
 
     def adiciona_Pessoa(self):
         self.pessoas_Variaveis()
@@ -105,13 +158,37 @@ class Funcao_Pessoas():
             self.conecta_bd()
             self.cursor.execute("""
                 INSERT INTO 
-                    cad_pessoas(
-                        cpf, nome, telefone, whatsapp, email, cep, rua, numero, bairro, cidade, estado, observacoes, data_cadastro) 
-                    VALUES (
-                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
-                    (self.cpf, self.nome, self.telefone, self.whatsapp, self.email, self.cep, self.rua, self.numero, self.bairro, self.cidade, self.estado, self.observacoes, self.data_cadastro))
+                    cad_pessoas( 
+                        cpf, 
+                        nome, 
+                        telefone, 
+                        whatsapp, 
+                        email, 
+                        cep, 
+                        rua, 
+                        numero, 
+                        bairro, 
+                        cidade, 
+                        estado, 
+                        observacoes, 
+                        data_cadastro) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                        (
+                         self.cpf,
+                         self.nome,
+                         self.telefone,
+                         self.whatsapp,
+                         self.email,
+                         self.cep,
+                         self.rua,
+                         self.numero,
+                         self.bairro,
+                         self.cidade,
+                         self.estado,
+                         self.observacoes,
+                         self.dataConvertida))
 
-            messagebox.showinfo(title="Cadastro de Pessoas", message="Pessoa Cadastrado com Sucesso")
+            messagebox.showinfo(title="Cadastro de Pessoas", message="Cadastro realizado com sucesso")
 
         self.conn.commit()
         self.desconecta_bd()
@@ -122,25 +199,24 @@ class Funcao_Pessoas():
         self.listapessoas.delete(*self.listapessoas.get_children())
         self.conecta_bd()
         listaPe = self.cursor.execute("""
-            SELECT * FROM
-                cad_pessoas 
-            ORDER BY 
-                id_pessoas ASC; """)
+            SELECT * FROM cad_pessoas ORDER BY id_pessoa ASC; """)
 
         listaPe = self.cursor.fetchall()
-
         for i in listaPe:
-            self.listapessoas.insert("", END, values=i)
+            teste = i[0:13]+(i[13].strftime('%d-%m-%Y'),)
+            self.listapessoas.insert("", END, values=teste)
 
         self.desconecta_bd()
 
-    def duplo_Clique_Pessoa(self, event):
+    def duploCliquePessoa(self, event):
         self.limpa_Tela_Pessoas()
         self.listapessoas.selection()
+        self.data_cadastro = self.converteDataParaBrasil()
 
         for n in self.listapessoas.selection():
+
             col1, col2, col3, col4, col5, col6, col7, col8, col9, col10, col11, col12, col13, col14 = self.listapessoas.item(n,'values')
-            self.e_id_pessoas.insert(END, col1)
+            self.e_id_pessoa.insert(END, col1)
             self.e_cpf.insert(END, col2)
             self.e_nome.insert(END, col3)
             self.e_telefone.insert(END, col4)
@@ -155,6 +231,7 @@ class Funcao_Pessoas():
             self.e_observacoes.insert(END, col13)
             self.e_data_cadastro.insert(END, col14)
 
+
     def deleta_Pessoa(self):
         self.pessoas_Variaveis()
         self.conecta_bd()
@@ -162,8 +239,8 @@ class Funcao_Pessoas():
             DELETE FROM 
                 cad_pessoas 
             WHERE 
-                id_pessoas = %s """, (
-                self.id_pessoas,))
+                id_pessoa = %s """, (
+                self.id_pessoa,))
 
         self.conn.commit()
         self.desconecta_bd()
@@ -191,7 +268,7 @@ class Funcao_Pessoas():
                 observacoes = %s,
                 data_cadastro = %s
             WHERE
-                id_pessoas = %s""",
+                id_pessoa = %s""",
                 (self.cpf,
                  self.nome,
                  self.telefone,
@@ -205,7 +282,7 @@ class Funcao_Pessoas():
                  self.estado,
                  self.observacoes,
                  self.data_cadastro,
-                 self.id_pessoas))
+                 self.id_pessoa))
 
         self.conn.commit()
         self.desconecta_bd()
@@ -218,7 +295,7 @@ class Funcao_Pessoas():
 
         cpf = self.e_cpf.get()
         nome = self.e_nome.get()
-        id_pessoas = self.e_id_pessoas.get()
+        id_pessoa = self.e_id_pessoa.get()
         telefone = self.e_telefone.get()
         whatsapp = self.e_whatsapp.get()
         email = self.e_email.get()
@@ -227,11 +304,11 @@ class Funcao_Pessoas():
             self.e_cpf.insert(END, "%")
             cpf = self.e_cpf.get()
             self.cursor.execute("""
-                SELECT * FROM 
-                    cad_pessoas
+                SELECT * FROM  
+                    cad_pessoas 
                 WHERE 
                     cpf 
-                LIKE '%s' ORDER BY cpf ASC""" % cpf, )
+                LIKE '%s' ORDER BY cpf ASC""" % cpf,)
 
             buscacpf = self.cursor.fetchall()
 
@@ -243,24 +320,25 @@ class Funcao_Pessoas():
             nome = self.e_nome.get()
             self.cursor.execute("""
                 SELECT * FROM 
-                    cad_pessoas 
+                    cad_pessoas
                 WHERE 
                     nome 
-                LIKE '%s' ORDER BY nome ASC""" % nome, )
+                LIKE '%s' ORDER BY nome ASC""" % nome,)
+
             buscanome = self.cursor.fetchall()
 
             for i in buscanome:
                 self.listapessoas.insert("", END, values=i)
 
-        elif len(id_pessoas) > 0:
-            self.e_id_pessoas.insert(END, "%")
-            id_pessoas = self.e_id_pessoas.get()
+        elif len(id_pessoa) > 0:
+            self.e_id_pessoa.insert(END, "%")
+            id_pessoa = self.e_id_pessoa.get()
             self.cursor.execute("""
                 SELECT * FROM 
                     cad_pessoas 
                 WHERE 
-                    id_pessoas 
-                LIKE '%s' ORDER BY id_pessoas ASC""" % id_pessoas,)
+                    id_pessoa 
+                LIKE '%s' ORDER BY id_pessoa ASC""" % id_pessoa,)
 
             buscaid_pessoas = self.cursor.fetchall()
 
@@ -275,7 +353,8 @@ class Funcao_Pessoas():
                     cad_pessoas 
                 WHERE 
                     telefone 
-                LIKE '%s' ORDER BY telefone ASC""" % telefone, )
+                LIKE '%s' ORDER BY telefone ASC""" % telefone,)
+
             buscatelefone = self.cursor.fetchall()
 
             for i in buscatelefone:
@@ -289,7 +368,8 @@ class Funcao_Pessoas():
                     cad_pessoas 
                 WHERE 
                     whatsapp 
-                LIKE '%s' ORDER BY whatsapp ASC""" % whatsapp, )
+                LIKE '%s' ORDER BY whatsapp ASC""" % whatsapp,)
+
             buscawhatsapp = self.cursor.fetchall()
 
             for i in buscawhatsapp:
@@ -312,20 +392,8 @@ class Funcao_Pessoas():
         self.limpa_Tela_Pessoas()
         self.desconecta_bd()
 
-        def calendario(self):
-            self.calendario1 = Calendar(fg='gray75', bg='blue', font=('Times', '9', 'bold'))
-            self.calendario1.place(x=10, y=10)
-            self.calData = Button(text="Inserir Data")
-            self.calData.place(x=20, y=20, height=25, width=100, command=self.print_call)
 
-        def print_call(self):
-            dataIni = self.calendario1.get_date()
-            self.calendario1.destroy()
-            self.e_data.delete(0, END)
-            self.e_data.insert(END, dataIni)
-            self.calData.destroy()
-
-class Aplicacao_Pessoas(Funcao_Pessoas):
+class Aplicacao_Pessoas(Funcao_Pessoas, Relatorio):
     def __init__(self):
         self.cadpessoas = cadpessoas
         self.tela_cadastro_Pessoas()
@@ -335,7 +403,6 @@ class Aplicacao_Pessoas(Funcao_Pessoas):
         self.grid_Pessoas()
         self.monta_Tabela_Pessoas()
         self.select_Pessoa()
-        self.deleta_Pessoa()
 
         self.cadpessoas.mainloop()
 
@@ -353,12 +420,12 @@ class Aplicacao_Pessoas(Funcao_Pessoas):
 
     def labels_entry_pessoas(self):
 
-        self.l_id_pessoas = Label(self.frame_superior_pessoas, text="Código:", justify='right', font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
-        self.l_id_pessoas.place(x=50, y=10)
-        self.e_id_pessoas = Entry(self.frame_superior_pessoas, width=45, justify='left', relief='raised', bg=co2, fg=co10)
-        self.e_id_pessoas.place(x=125, y=10)
+        self.l_id_pessoa= Label(self.frame_superior_pessoas, text="Código:", justify='right', font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
+        self.l_id_pessoa.place(x=50, y=10)
+        self.e_id_pessoa = Entry(self.frame_superior_pessoas, width=45, justify='left', relief='raised', bg=co2, fg=co10)
+        self.e_id_pessoa.place(x=125, y=10)
 
-        self.l_cpf = Label(self.frame_superior_pessoas, text="Cpf:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
+        self.l_cpf = Label(self.frame_superior_pessoas, text="CPF:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
         self.l_cpf.place(x=555, y=10)
         self.e_cpf = Entry(self.frame_superior_pessoas, width=45, justify='left', relief='raised', bg=co2, fg=co10)
         self.e_cpf.place(x=600, y=10)
@@ -383,7 +450,7 @@ class Aplicacao_Pessoas(Funcao_Pessoas):
         self.e_email = Entry(self.frame_superior_pessoas, width=45, justify='left', relief='raised', bg=co2, fg=co10)
         self.e_email.place(x=600, y=60)
 
-        self.l_cep = Label(self.frame_superior_pessoas, text="Cep:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
+        self.l_cep = Label(self.frame_superior_pessoas, text="CEP:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
         self.l_cep.place(x=80, y=85)
         self.e_cep = Entry(self.frame_superior_pessoas, width=45, justify='left', relief='raised', bg=co2, fg=co10)
         self.e_cep.place(x=125, y=85)
@@ -420,35 +487,38 @@ class Aplicacao_Pessoas(Funcao_Pessoas):
 
         self.l_data = Label(self.frame_superior_pessoas, text="Data de Cadastro:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
         self.l_data.place(x=425, y=160)
-        self.e_data_cadastro = DateEntry(self.frame_superior_pessoas, width=42, justify='left', relief='raised')
+        self.e_data_cadastro = DateEntry(self.frame_superior_pessoas, width=42, justify='left', relief='raised', locale="pt_br")
         self.e_data_cadastro.place(x=600, y=160)
 
     def botoes_tela_pessoas(self):
-        self.b_limpar = Button(self.frame_superior_pessoas, text="Limpar", command=self.limpa_Tela_Pessoas, width=10,font=('Ivy 8 bold'), bg=co6, fg=co2, relief=RAISED, overrelief=RIDGE)
+        self.b_limpar = Button(self.frame_superior_pessoas, text="Limpar", command=self.limpa_Tela_Pessoas, width=10,font=('Ivy 10 bold'), bg=co6, fg=co2, relief=RAISED, overrelief=RIDGE)
         self.b_limpar.place(x=280, y=200, height=40, width=100)
 
-        self.b_procurar = Button(self.frame_superior_pessoas, text="Procurar:", command=self.buscar_Pessoa, width=10, font=('Ivy 8 bold'), bg=co6, fg=co2, relief=RAISED, overrelief=RIDGE)
+        self.b_procurar = Button(self.frame_superior_pessoas, text="Procurar", command=self.buscar_Pessoa, width=10, font=('Ivy 10 bold'), bg=co6, fg=co2, relief=RAISED, overrelief=RIDGE)
         self.b_procurar.place(x=390, y=200, height=40, width=100)
 
-        self.b_adicionar = Button(self.frame_superior_pessoas, text="Adicionar:", command=self.adiciona_Pessoa, width=10, font=('Ivy 8 bold'), bg=co7, fg=co2, relief=RAISED, overrelief=RIDGE)
+        self.b_adicionar = Button(self.frame_superior_pessoas, text="Adicionar", command=self.adiciona_Pessoa, width=10, font=('Ivy 10 bold'), bg=co7, fg=co2, relief=RAISED, overrelief=RIDGE)
         self.b_adicionar.place(x=500, y=200, height=40, width=100)
 
-        self.b_alterar = Button(self.frame_superior_pessoas, text="Alterar:", command=self.altera_Pessoa, width=10, font=('Ivy 8 bold'), bg=co8, fg=co2, relief=RAISED, overrelief=RIDGE)
+        self.b_alterar = Button(self.frame_superior_pessoas, text="Alterar", command=self.altera_Pessoa, width=10, font=('Ivy 10 bold'), bg=co8, fg=co2, relief=RAISED, overrelief=RIDGE)
         self.b_alterar.place(x=610, y=200, height=40, width=100)
 
-        self.b_excluir = Button(self.frame_superior_pessoas, text="Excluir:", command=self.deleta_Pessoa, width=10, font=('Ivy 8 bold'), bg=co9, fg=co2, relief=RAISED, overrelief=RIDGE)
+        self.b_excluir = Button(self.frame_superior_pessoas, text="Excluir", command=self.deleta_Pessoa, width=10, font=('Ivy 10 bold'), bg=co9, fg=co2, relief=RAISED, overrelief=RIDGE)
         self.b_excluir.place(x=720, y=200, height=40, width=100)
+
+        self.b_imprimir = Button(self.frame_superior_pessoas, text="Imprimir", command=self.geraRelatorio, width=10, font=('Ivy 10 bold'), bg=co6, fg=co2, relief=RAISED, overrelief=RIDGE)
+        self.b_imprimir.place(x=830, y=200, height=40, width=100)
 
     def grid_Pessoas(self):
         self.listapessoas = ttk.Treeview(self.frame_grid_pessoas, columns=("col0", "col1", "col2", "col3", "col4", "col5", "col6", "col7", "col8", "col9", "col10", "col11", "col12", "col13"))
         self.listapessoas.heading("#0", text="")
         self.listapessoas.heading("#1", text="Código")
-        self.listapessoas.heading("#2", text="Cpf")
+        self.listapessoas.heading("#2", text="CPF")
         self.listapessoas.heading("#3", text="Nome")
         self.listapessoas.heading("#4", text="Telefone")
         self.listapessoas.heading("#5", text="WhatsApp")
         self.listapessoas.heading("#6", text="E-Mail")
-        self.listapessoas.heading("#7", text="Cep")
+        self.listapessoas.heading("#7", text="CEP")
         self.listapessoas.heading("#8", text="Rua")
         self.listapessoas.heading("#9", text="Número")
         self.listapessoas.heading("#10", text="Bairro")
@@ -457,23 +527,23 @@ class Aplicacao_Pessoas(Funcao_Pessoas):
         self.listapessoas.heading("#13", text="Observações")
         self.listapessoas.heading("#14", text="Data Cadastro")
 
-        self.listapessoas.column("#0", anchor='center', width=2)
+        self.listapessoas.column("#0", anchor='center', width=1)
         self.listapessoas.column("#1", anchor='center', width=50)
         self.listapessoas.column("#2", anchor='center', width=75)
-        self.listapessoas.column("#3", anchor='center',  width=85)
+        self.listapessoas.column("#3", anchor='center',  width=94)
         self.listapessoas.column("#4", anchor='center',  width=85)
         self.listapessoas.column("#5", anchor='center', width=85)
-        self.listapessoas.column("#6", anchor='center', width=85)
+        self.listapessoas.column("#6", anchor='center', width=100)
         self.listapessoas.column("#7", anchor='center',  width=74)
         self.listapessoas.column("#8", anchor='center',  width=74)
-        self.listapessoas.column("#9", anchor='center',  width=50)
+        self.listapessoas.column("#9", anchor='center',  width=55)
         self.listapessoas.column("#10", anchor='center',  width=74)
         self.listapessoas.column("#11", anchor='center',  width=74)
-        self.listapessoas.column("#12", anchor='center',  width=74)
+        self.listapessoas.column("#12", anchor='center',  width=45)
         self.listapessoas.column("#13", anchor='center',  width=74)
         self.listapessoas.column("#14", anchor='center', width=74)
 
-        self.listapessoas.place(x=10, y=10, height=290, width=1035)
+        self.listapessoas.place(x=0, y=0, height=328, width=1050)
 
         self.barra_vertical = ttk.Scrollbar(self.frame_grid_pessoas, orient='vertical', command=self.listapessoas.yview)
         self.barra_vertical.place(x=1048, y=0, height=328, width=15)
@@ -483,6 +553,6 @@ class Aplicacao_Pessoas(Funcao_Pessoas):
 
         self.listapessoas.configure(yscrollcommand=self.barra_vertical.set, xscrollcommand=self.barra_horizontal.set)
 
-        self.listapessoas.bind("<Double-1>", self.duplo_Clique_Pessoa)
+        self.listapessoas.bind("<Double-1>", self.duploCliquePessoa)
 
 Aplicacao_Pessoas()
