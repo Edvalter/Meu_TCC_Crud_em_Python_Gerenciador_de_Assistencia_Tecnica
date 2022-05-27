@@ -9,7 +9,7 @@ from tkinter import messagebox
 from tkinter import ttk
 from view import *
 import view
-import datetime
+
 from datetime import datetime as dt
 import mysql.connector
 from tkcalendar import Calendar, DateEntry
@@ -139,16 +139,13 @@ class Funcao_Pessoas():
         self.observacoes = self.e_observacoes.get()
         self.data_cadastro = self.e_data_cadastro.get()
         self.dataConvertida = self.converteData()
-        self.converteDataParaBrasil = self.converteDataParaBrasil()
-
 
     def converteData(self):
-        dataConvertida = dt.strptime(self.data_cadastro, '%d/%m/%Y')
-        return dataConvertida
-
-    def converteDataParaBrasil(self):
-        dataConvertidaParaBrasil = dt.strptime(self.data_cadastro, '%Y-%m-%d')
-        return dataConvertidaParaBrasil
+        if self.data_cadastro != '':
+            dataConvertida = dt.strptime(self.data_cadastro, '%d/%m/%Y')
+            return dataConvertida
+        else:
+            pass
 
     def adiciona_Pessoa(self):
         self.pessoas_Variaveis()
@@ -203,7 +200,7 @@ class Funcao_Pessoas():
 
         listaPe = self.cursor.fetchall()
         for i in listaPe:
-            teste = i[0:13]+(i[13].strftime('%d-%m-%Y'),)
+            teste = i[0:13]+(i[13].strftime('%d/%m/%Y'),)
             self.listapessoas.insert("", END, values=teste)
 
         self.desconecta_bd()
@@ -211,11 +208,11 @@ class Funcao_Pessoas():
     def duploCliquePessoa(self, event):
         self.limpa_Tela_Pessoas()
         self.listapessoas.selection()
-        self.data_cadastro = self.converteDataParaBrasil()
+        #self.data_cadastro = self.e_data_cadastro.get() <- pode deletar
 
         for n in self.listapessoas.selection():
-
             col1, col2, col3, col4, col5, col6, col7, col8, col9, col10, col11, col12, col13, col14 = self.listapessoas.item(n,'values')
+
             self.e_id_pessoa.insert(END, col1)
             self.e_cpf.insert(END, col2)
             self.e_nome.insert(END, col3)
@@ -249,49 +246,54 @@ class Funcao_Pessoas():
 
     def altera_Pessoa(self):
         self.pessoas_Variaveis()
-        self.conecta_bd()
-        self.cursor.execute("""
-            UPDATE
-                cad_pessoas
-            SET
-                cpf = %s,
-                nome = %s,
-                telefone = %s,
-                whatsapp = %s,
-                email = %s,
-                cep = %s,
-                rua = %s,
-                numero = %s,
-                bairro = %s,
-                cidade = %s,
-                estado = %s,
-                observacoes = %s,
-                data_cadastro = %s
-            WHERE
-                id_pessoa = %s""",
-                (self.cpf,
-                 self.nome,
-                 self.telefone,
-                 self.whatsapp,
-                 self.email,
-                 self.cep,
-                 self.rua,
-                 self.numero,
-                 self.bairro,
-                 self.cidade,
-                 self.estado,
-                 self.observacoes,
-                 self.data_cadastro,
-                 self.id_pessoa))
+        if self.id_pessoa == '':
+            pass
+        else:
+            self.conecta_bd()
+            self.cursor.execute("""
+                UPDATE
+                    cad_pessoas
+                SET
+                    cpf = %s,
+                    nome = %s,
+                    telefone = %s,
+                    whatsapp = %s,
+                    email = %s,
+                    cep = %s,
+                    rua = %s,
+                    numero = %s,
+                    bairro = %s,
+                    cidade = %s,
+                    estado = %s,
+                    observacoes = %s,
+                    data_cadastro = %s
+                WHERE
+                    id_pessoa = %s""",
+                    (self.cpf,
+                     self.nome,
+                     self.telefone,
+                     self.whatsapp,
+                     self.email,
+                     self.cep,
+                     self.rua,
+                     self.numero,
+                     self.bairro,
+                     self.cidade,
+                     self.estado,
+                     self.observacoes,
+                     self.dataConvertida,
+                     self.id_pessoa))
 
-        self.conn.commit()
-        self.desconecta_bd()
-        self.select_Pessoa()
-        self.limpa_Tela_Pessoas()
+            self.conn.commit()
+            self.desconecta_bd()
+            self.select_Pessoa()
+            # self.limpa_Tela_Pessoas() <-- fica melhor se o usuario ver o que foi alterado ainda na tela.
 
     def buscar_Pessoa(self):
+
         self.conecta_bd()
         self.listapessoas.delete(*self.listapessoas.get_children())
+
 
         cpf = self.e_cpf.get()
         nome = self.e_nome.get()
@@ -391,6 +393,7 @@ class Funcao_Pessoas():
 
         self.limpa_Tela_Pessoas()
         self.desconecta_bd()
+
 
 
 class Aplicacao_Pessoas(Funcao_Pessoas, Relatorio):
