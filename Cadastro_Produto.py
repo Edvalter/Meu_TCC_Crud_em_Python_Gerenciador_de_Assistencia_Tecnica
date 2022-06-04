@@ -1,35 +1,5 @@
 
-"""
-https://www.youtube.com/watch?v=Epz87iYfXtw
 
-verificar a possibilidade de colocar um visualizador instantaneo de como fica preenchido os campos
-
-fazer um IF para que se for procurado um protudo e não encontrar, informar na tela PRODUTO NÃO ENCONTRADO
-
-    ver para fazer o confirmação ou cancelamento na hora de alterar/cadastrar um cliente
-    messagebox.askquestion("ADICIONADO", " Os Dados Foram Acicionados")
-    askyesno()
-
-    class tkinter.messagebox.Message(master=None, **options)
-    Cria uma caixa de mensagem padrão de informações.
-
-    Caixa de mensagem de informação
-
-    tkinter.messagebox.showinfo(title=None, message=None, **options)
-    Caixas de mensagem de atenção
-
-    tkinter.messagebox.showwarning(title=None, message=None, **options)
-    tkinter.messagebox.showerror(title=None, message=None, **options)
-    Caixas de mensagem de dúvida
-
-    tkinter.messagebox.askquestion(title=None, message=None, **options)
-    tkinter.messagebox.askokcancel(title=None, message=None, **options)
-    tkinter.messagebox.askretrycancel(title=None, message=None, **options)
-    tkinter.messagebox.askyesno(title=None, message=None, **options)
-    tkinter.messagebox.askyesnocancel(title=None, message=None, **options)
-
-
-"""
 import os
 import pickle
 import sys
@@ -117,11 +87,23 @@ class Funcao():
             self.conecta_bd()
             self.cursor.execute("""
                 INSERT INTO
-                    cad_produto 
-                        (produto, marca, modelo, cor, valor_compra, valor_venda, estoque) 
+                    cad_produto (
+                        produto, 
+                        marca, 
+                        modelo, 
+                        cor, 
+                        valor_compra, 
+                        valor_venda, 
+                        estoque) 
                 VALUES 
-                        (%s, %s, %s, %s, %s, %s, %s);""",
-                        (self.produto, self.marca, self.modelo, self.cor, self.valor_compra, self.valor_venda, self.estoque))
+                        (%s, %s, %s, %s, %s, %s, %s);""", (
+                        self.produto,
+                        self.marca,
+                        self.modelo,
+                        self.cor,
+                        self.valor_compra,
+                        self.valor_venda,
+                        self.estoque))
 
             messagebox.showinfo(title="Cadastrado de Produto", message="Produto Cadastro com Sucesso")
 
@@ -184,7 +166,13 @@ class Funcao():
             UPDATE 
                 cad_produto
             SET 
-                produto = %s, marca = %s, modelo = %s, cor = %s, valor_compra = %s, valor_venda = %s, estoque = %s 
+                produto = %s, 
+                marca = %s, 
+                modelo = %s, 
+                cor = %s, 
+                valor_compra = %s, 
+                valor_venda = %s, 
+                estoque = %s 
             WHERE 
                 id_produto = %s""", (
                 self.produto,
@@ -340,19 +328,19 @@ class Aplicacao_Produto(Funcao):
         self.e_estoque.place(x=610, y=85)
 
     def botoes(self):
-        self.b_limpar = Button(self.frame_superior, text="Limpar", command=self.limpa_tela, width=10, font=('Ivy 8 bold'), bg=co6, fg=co2, relief=RAISED, overrelief=RIDGE)
+        self.b_limpar = Button(self.frame_superior, text="Limpar", command=self.limpa_tela, width=10, font=("Courier", 13, "italic", "bold"), bg=co6, fg=co2, relief=RAISED, overrelief=RIDGE)
         self.b_limpar.place(x=280, y=130, height=40, width=100)
 
-        self.b_procurar = Button(self.frame_superior, text="Procurar:", command=self.buscar_Produto, width=10, font=('Ivy 8 bold'), bg=co6, fg=co2, relief=RAISED, overrelief=RIDGE)
+        self.b_procurar = Button(self.frame_superior, text="Procurar", command=self.buscar_Produto, width=10, font=("Courier", 13, "italic", "bold"), bg=co6, fg=co2, relief=RAISED, overrelief=RIDGE)
         self.b_procurar.place(x=390, y=130, height=40, width=100)
 
-        self.b_adicionar = Button(self.frame_superior, text="Adicionar:", command=self.adiciona_Produto, width=10, font=('Ivy 8 bold'), bg=co7, fg=co2, relief=RAISED, overrelief=RIDGE)
+        self.b_adicionar = Button(self.frame_superior, text="Adicionar", command=self.adiciona_Produto, width=10, font=("Courier", 13, "italic", "bold"), bg=co7, fg=co2, relief=RAISED, overrelief=RIDGE)
         self.b_adicionar.place(x=500, y=130, height=40, width=100)
 
-        self.b_alterar = Button(self.frame_superior, text="Alterar:", command=self.altera_Produto, width=10, font=('Ivy 8 bold'), bg=co8, fg=co2, relief=RAISED, overrelief=RIDGE)
+        self.b_alterar = Button(self.frame_superior, text="Alterar", command=self.altera_Produto, width=10, font=("Courier", 13, "italic", "bold"), bg=co8, fg=co2, relief=RAISED, overrelief=RIDGE)
         self.b_alterar.place(x=610, y=130, height=40, width=100)
 
-        self.b_excluir = Button(self.frame_superior, text="Excluir:", command=self.deleta_Produto, width=10, font=('Ivy 8 bold'), bg=co9, fg=co2, relief=RAISED, overrelief=RIDGE)
+        self.b_excluir = Button(self.frame_superior, text="Excluir", command=self.deleta_Produto, width=10, font=("Courier", 13, "italic", "bold"), bg=co9, fg=co2, relief=RAISED, overrelief=RIDGE)
         self.b_excluir.place(x=720, y=130, height=40, width=100)
 
     def grid_produto(self):
