@@ -158,7 +158,7 @@ class Funcao_Pessoas():
     def adiciona_Pessoa(self):
         self.pessoas_Variaveis()
         if self.e_cpf.get() == "" or self.e_nome.get() == "":
-            messagebox.showerror(title="Cadastro de Pessoas", message="Campos CPF ou Nome estão vazios")
+            messagebox.showerror(title="Cadastro de Pessoas", message="Campo CPF ou Nome estão vazios")
         else:
             self.conecta_bd()
             self.cursor.execute("""
@@ -178,8 +178,7 @@ class Funcao_Pessoas():
                         observacoes,
                         statuspessoa, 
                         data_cadastro) 
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
-                        (
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""", (
                          self.cpf,
                          self.nome,
                          self.telefone,
@@ -213,10 +212,6 @@ class Funcao_Pessoas():
         for i in listaPe:
             teste = i[0:14]+(i[14].strftime('%d/%m/%Y'),)
             self.listapessoas.insert("", END, values=teste)
-
-        #for i in listaPe:
-        #    self.listapessoas.insert("", END, values=i)
-
 
         self.desconecta_bd()
 
@@ -266,7 +261,6 @@ class Funcao_Pessoas():
             pass
         else:
             self.conecta_bd()
-
             self.cursor.execute("""
                 UPDATE
                     cad_pessoas
