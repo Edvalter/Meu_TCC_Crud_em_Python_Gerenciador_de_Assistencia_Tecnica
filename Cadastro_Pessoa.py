@@ -107,7 +107,7 @@ class Funcao_Pessoas():
         self.cursor.execute("""
                 CREATE TABLE IF NOT EXISTS cad_pessoas(
                     id_pessoa INTEGER AUTO_INCREMENT,
-                    cpf INTEGER,
+                    cpf VARCHAR(100),
                     nome VARCHAR(100),
                     telefone VARCHAR(100),
                     whatsapp VARCHAR(100),
