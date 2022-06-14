@@ -78,7 +78,6 @@ class Relatorio():
         self.imprimir()
 
 class Funcao_Pessoas():
-
     def limpa_Tela_Pessoas(self):
         self.e_id_pessoa.delete(0, END)
         self.e_cpf.delete(0, END)
@@ -95,8 +94,6 @@ class Funcao_Pessoas():
         self.e_observacoes.delete(0, END)
         self.e_data_cadastro.delete(0, END)
         self.c_statuspessoa.delete(0, END)
-
-
 
     def conecta_bd(self):
         self.conn = mysql.connector.connect(host='localhost', database='gerenciador', user='root', password='admin')
@@ -163,7 +160,7 @@ class Funcao_Pessoas():
             self.conecta_bd()
             self.cursor.execute("""
                 INSERT INTO 
-                    cad_pessoas( 
+                    pessoas( 
                         cpf, 
                         nome, 
                         telefone, 
@@ -210,8 +207,8 @@ class Funcao_Pessoas():
         listaPe = self.cursor.fetchall()
 
         for i in listaPe:
-            teste = i[0:14]+(i[14].strftime('%d/%m/%Y'),)
-            self.listapessoas.insert("", END, values=teste)
+            posicaoDaData = i[0:14]+(i[14].strftime('%d/%m/%Y'),)
+            self.listapessoas.insert("", END, values=posicaoDaData)
 
         self.desconecta_bd()
 
@@ -237,8 +234,6 @@ class Funcao_Pessoas():
             self.e_observacoes.insert(END, col13)
             self.c_statuspessoa .insert(END, col14)
             self.e_data_cadastro.insert(END, col15)
-
-
 
     def deleta_Pessoa(self):
         self.pessoas_Variaveis()
