@@ -93,7 +93,7 @@ class Funcao_Pessoas():
         self.e_estado.delete(0, END)
         self.e_observacoes.delete(0, END)
         self.e_data_cadastro.delete(0, END)
-        self.c_statuspessoa.delete(0, END)
+        self.c_status_pessoa.delete(0, END)
 
     def conecta_bd(self):
         self.conn = mysql.connector.connect(host='localhost', database='gerenciador', user='root', password='admin')
@@ -112,7 +112,7 @@ class Funcao_Pessoas():
                     telefone VARCHAR(100),
                     whatsapp VARCHAR(100),
                     email VARCHAR(100),
-                    cep INTEGER,
+                    cep VARCHAR(100),
                     rua VARCHAR(100),
                     numero INTEGER,
                     bairro VARCHAR(100),
@@ -141,7 +141,7 @@ class Funcao_Pessoas():
         self.cidade = self.e_cidade.get()
         self.estado = self.e_estado.get()
         self.observacoes = self.e_observacoes.get()
-        self.statuspessoa = self.c_statuspessoa.get()
+        self.status_pessoa = self.c_status_pessoa.get()
         self.data_cadastro = self.e_data_cadastro.get()
         self.dataConvertida = self.converteData()
 
@@ -173,7 +173,7 @@ class Funcao_Pessoas():
                         cidade, 
                         estado, 
                         observacoes,
-                        statuspessoa, 
+                        status_pessoa, 
                         data_cadastro) 
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""", (
                          self.cpf,
@@ -188,7 +188,7 @@ class Funcao_Pessoas():
                          self.cidade,
                          self.estado,
                          self.observacoes,
-                         self.statuspessoa,
+                         self.status_pessoa,
                          self.dataConvertida))
 
             messagebox.showinfo(title="Cadastro de Pessoas", message="Cadastro realizado com sucesso")
@@ -202,7 +202,7 @@ class Funcao_Pessoas():
         self.listapessoas.delete(*self.listapessoas.get_children())
         self.conecta_bd()
         listaPe = self.cursor.execute("""
-            SELECT * FROM cad_pessoas ORDER BY id_pessoa ASC; """)
+            SELECT * FROM pessoas ORDER BY id_pessoa ASC; """)
 
         listaPe = self.cursor.fetchall()
 
@@ -232,7 +232,7 @@ class Funcao_Pessoas():
             self.e_cidade.insert(END, col11)
             self.e_estado.insert(END, col12)
             self.e_observacoes.insert(END, col13)
-            self.c_statuspessoa .insert(END, col14)
+            self.c_status_pessoa .insert(END, col14)
             self.e_data_cadastro.insert(END, col15)
 
     def deleta_Pessoa(self):
@@ -240,7 +240,7 @@ class Funcao_Pessoas():
         self.conecta_bd()
         self.cursor.execute("""
             DELETE FROM 
-                cad_pessoas 
+                pessoas 
             WHERE 
                 id_pessoa = %s """, (
                 self.id_pessoa,))
@@ -258,7 +258,7 @@ class Funcao_Pessoas():
             self.conecta_bd()
             self.cursor.execute("""
                 UPDATE
-                    cad_pessoas
+                    pessoas
                 SET
                     cpf = %s,
                     nome = %s,
@@ -272,7 +272,7 @@ class Funcao_Pessoas():
                     cidade = %s,
                     estado = %s,
                     observacoes = %s,
-                    statuspessoa = %s,
+                    status_pessoa = %s,
                     data_cadastro = %s 
                 WHERE
                     id_pessoa = %s""",
@@ -288,7 +288,7 @@ class Funcao_Pessoas():
                      self.cidade,
                      self.estado,
                      self.observacoes,
-                     self.statuspessoa,
+                     self.status_pessoa,
                      self.dataConvertida,
                      self.id_pessoa))
 
@@ -297,7 +297,6 @@ class Funcao_Pessoas():
             self.select_Pessoa()
 
     def buscar_Pessoa(self):
-
         self.conecta_bd()
         self.listapessoas.delete(*self.listapessoas.get_children())
 
@@ -313,7 +312,7 @@ class Funcao_Pessoas():
             cpf = self.e_cpf.get()
             self.cursor.execute("""
                 SELECT * FROM  
-                    cad_pessoas 
+                    pessoas 
                 WHERE 
                     cpf 
                 LIKE '%s' ORDER BY cpf ASC""" % cpf,)
@@ -328,7 +327,7 @@ class Funcao_Pessoas():
             nome = self.e_nome.get()
             self.cursor.execute("""
                 SELECT * FROM 
-                    cad_pessoas
+                    pessoas
                 WHERE 
                     nome 
                 LIKE '%s' ORDER BY nome ASC""" % nome,)
@@ -343,7 +342,7 @@ class Funcao_Pessoas():
             id_pessoa = self.e_id_pessoa.get()
             self.cursor.execute("""
                 SELECT * FROM 
-                    cad_pessoas 
+                    pessoas 
                 WHERE 
                     id_pessoa 
                 LIKE '%s' ORDER BY id_pessoa ASC""" % id_pessoa,)
@@ -358,7 +357,7 @@ class Funcao_Pessoas():
             telefone = self.e_telefone.get()
             self.cursor.execute("""
                 SELECT * FROM 
-                    cad_pessoas 
+                    pessoas 
                 WHERE 
                     telefone 
                 LIKE '%s' ORDER BY telefone ASC""" % telefone,)
@@ -373,7 +372,7 @@ class Funcao_Pessoas():
             whatsapp = self.e_whatsapp.get()
             self.cursor.execute("""
                 SELECT * FROM 
-                    cad_pessoas 
+                    pessoas 
                 WHERE 
                     whatsapp 
                 LIKE '%s' ORDER BY whatsapp ASC""" % whatsapp,)
@@ -388,7 +387,7 @@ class Funcao_Pessoas():
             email = self.e_email.get()
             self.cursor.execute("""
                 SELECT * FROM 
-                    cad_pessoas 
+                    pessoas 
                 WHERE 
                     email 
                 LIKE '%s' ORDER BY email ASC""" % email, )
@@ -397,10 +396,10 @@ class Funcao_Pessoas():
             for i in buscaemail:
                 self.listapessoas.insert("", END, values=i)
 
+
+
         self.limpa_Tela_Pessoas()
         self.desconecta_bd()
-
-
 
 class Aplicacao_Pessoas(Funcao_Pessoas, Relatorio):
     def __init__(self):
@@ -498,12 +497,12 @@ class Aplicacao_Pessoas(Funcao_Pessoas, Relatorio):
         self.e_data_cadastro = DateEntry(self.frame_superior_pessoas, width=42, justify='left', relief='raised', locale="pt_br")
         self.e_data_cadastro.place(x=600, y=160)
 
-        self.l_statuspessoa = Label(self.frame_superior_pessoas, text="Status:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co0)
-        self.l_statuspessoa.place(x=45, y=185)
-        self.c_statuspessoa = Combobox(self.frame_superior_pessoas, width=42)
-        self.c_statuspessoa["values"] = ("Cliente", "Funcionário")
-        self.c_statuspessoa.set("Cliente")
-        self.c_statuspessoa.place(x=125, y=185)
+        self.l_status_pessoa = Label(self.frame_superior_pessoas, text="Status:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co0)
+        self.l_status_pessoa.place(x=45, y=185)
+        self.c_status_pessoa = Combobox(self.frame_superior_pessoas, width=42)
+        self.c_status_pessoa["values"] = ("Cliente", "Funcionário")
+        self.c_status_pessoa.set("Cliente")
+        self.c_status_pessoa.place(x=125, y=185)
 
 
     def botoes_tela_pessoas(self):

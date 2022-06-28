@@ -37,50 +37,88 @@ co8 =  "#ffff99"  # Botão Alterar
 co9 =  "#d54c4a"  # botão excluir
 co10 = "white"
 
+TelaDeLogin = Tk()
 
-login = Tk()
+class Login():
+    def limpaTela(self):
+        self.e_login.delete(0, END)
+        self.e_senha.delete(0, END)
+        self.e_login.focus()
 
-class Aplicacao_Login():
+    def conecta_bd(self):
+        self.conn = mysql.connector.connect(host='localhost', database='gerenciador', user='root', password='admin')
+        self.cursor = self.conn.cursor()
+
+    def desconecta_bd(self):
+        self.conn.close()
+
+class Aplicacao_Login(Login):
     def __init__(self):
-        self.login = login
+# - - Construtores - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        self.TelaDeLogin = TelaDeLogin
         self.tela_login()
         self.labels_login()
         self.botao()
 
+        self.TelaDeLogin.mainloop()
 
-        self.login.mainloop()
-
+# - - Configurando as posições/medidas da tela de login - - - - - - - - -
     def tela_login(self):
-        self.login.title("Segat")
-        self.login.config(bg=co3)
-        self.login.geometry("300x250+550+250")
-        self.login.resizable(width=False, height=False)
+        self.TelaDeLogin.title("SegaT")
+        self.TelaDeLogin.config(bg=co3)
+        self.TelaDeLogin.geometry("300x250+550+250")
+        self.TelaDeLogin.resizable(width=False, height=False)
 
+# - - Posição dos Label's e Entry's - - - - - - - - - - - - - - - - - -
     def labels_login(self):
-        self.l_login = Label(self.login, text="Login", font=("Courier", 15, "italic", "bold"), bg=co3, fg=co10)
+        self.l_login = Label(self.TelaDeLogin, text="Login", font=("Courier", 13, "italic", "bold"), bg=co3, fg=co10)
         self.l_login.place(x=110, y=15)
-        self.e_login = Entry(self.login, justify='center', relief='raised', bg=co2, fg=co10)
+        self.e_login = Entry(self.TelaDeLogin, justify='center', relief='raised', bg=co2, fg=co10)
         self.e_login.place(x=100, y=40, width=100)
 
-        self.l_senha = Label(self.login, text="Senha", font=("Courier", 15, "italic", "bold"), bg=co3, fg=co10)
+        self.l_senha = Label(self.TelaDeLogin, text="Senha", font=("Courier", 13, "italic", "bold"), bg=co3, fg=co10)
         self.l_senha.place(x=110, y=65)
-        self.e_senha = Entry(self.login, justify='center', show="*", relief='raised', bg=co2, fg=co10)
+        self.e_senha = Entry(self.TelaDeLogin, justify='center', relief='raised', bg=co2, fg=co10) #show="*",
         self.e_senha.place(x=100, y=90, width=100)
 
+# - - Botão Entrar - - - - - - - - - - - - - - - - - - - - - - - - - -
     def botao(self):
-        self.b_entrar = Button(self.login, text="Entrar", command=self.entra, font=("Courier", 15, "italic", "bold"), bg=co3, fg=co10)
+        self.b_entrar = Button(self.TelaDeLogin, text="Entrar", command=self.entra, font=("Courier", 13, "italic", "bold"), bg=co3, fg=co10)
         self.b_entrar.place(x=100, y=150, width=100)
 
+# - - Função Entrar - - - - - - - - - - - - - - - -
     def entra(self):
-        login = self.e_login.get()
-        senha = self.e_senha.get()
+        self.conecta_bd()
+        self.login = self.e_login.get()
+        self.senha = self.e_senha.get()
 
-        if login == "edi" and senha == "edi":
-            print("Logou")
-            self.login.destroy()
-            call(["python", "Tela_Janela_Principal.py"])
+        self.valida_login = self.cursor.execute(f"""SELECT login from funcionario where login = '{self.login}'""")
+        self.valida_login = self.cursor.fetchone()
+        self.valida_login = self.valida_login[0]
 
-        else:
-            messagebox.showerror(title="Acesso Negado", message="Verifique Login e Senha")
+        self.valida_senha = self.cursor.execute(f"""SELECT senha FROM funcionario where login = '{self.login}';""")
+        self.valida_senha = self.cursor.fetchone()
+        self.valida_senha = self.valida_senha[0]
+
+        if self.valida_login == '':
+            messagebox.showerror(title="Acesso Negado", message="Usuário não informado!")
+
+        elif self.valida_login is not None:
+            if self.valida_senha == self.senha:
+                self.TelaDeLogin.destroy()
+                call(["python", "Tela_Janela_Principal.py"])
+
+            elif self.valida_senha == '':
+                messagebox.showerror(title="Acesso Negado", message="Dados informados incorretos.")
+
+            elif self.valida_senha != self.senha:
+                messagebox.showerror(title="Acesso Negado", message="Senha incorreta!")
+
+
+        elif self.valida_login is None:
+            messagebox.showerror(title="Acesso Negado", message="Dados informados incorretos!")
+
+        self.limpaTela()
+        self.desconecta_bd()
 
 Aplicacao_Login()
