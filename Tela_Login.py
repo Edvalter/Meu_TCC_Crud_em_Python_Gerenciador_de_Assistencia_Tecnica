@@ -40,21 +40,60 @@ co10 = "white"
 TelaDeLogin = Tk()
 
 class Login():
+# - - Limpar a Tela - - - - - - - - - - - - - - - -
     def limpaTela(self):
         self.e_login.delete(0, END)
         self.e_senha.delete(0, END)
         self.e_login.focus()
 
+# - - Conectar ao Banco de Dados - - - - - - - - - - - - - - - -
     def conecta_bd(self):
         self.conn = mysql.connector.connect(host='localhost', database='gerenciador', user='root', password='admin')
         self.cursor = self.conn.cursor()
 
+# - - Desconectar ao Banco de Dados  - - - - - - - - - - - - - - - -
     def desconecta_bd(self):
         self.conn.close()
 
+# - - Função Entrar - - - - - - - - - - - - - - - -
+    def entra(self):
+        self.conecta_bd()
+        self.login = self.e_login.get()
+        self.senha = self.e_senha.get()
+
+        self.valida_login = self.cursor.execute(f"""SELECT login from funcionario WHERE login = '{self.login}'""")
+        self.valida_login = self.cursor.fetchone()
+        if self.valida_login is None:
+            self.valida_login = None
+        else:
+            self.valida_login = self.valida_login[0]
+        self.valida_senha = self.cursor.execute(f"""SELECT senha FROM funcionario WHERE login = '{self.login}' and 
+                                                senha = '{self.senha}';""")
+        self.valida_senha = self.cursor.fetchone()
+        if self.valida_senha is None:
+            self.valida_senha = None
+        else:
+            self.valida_senha = self.valida_senha[0]
+
+        if self.login == '':
+            messagebox.showerror(title="Acesso Negado", message="Usuário não informado!")
+
+        elif self.valida_login is not None:
+            if self.valida_senha is not None:
+                self.TelaDeLogin.destroy()
+                call(["python", "Tela_Janela_Principal.py"])
+
+            elif self.valida_senha is None:
+                messagebox.showerror(title="Acesso Negado", message="Senha incorreta!")
+
+        elif self.valida_login is None:
+            messagebox.showerror(title="Acesso Negado", message="Dados informados incorretos!")
+
+        self.desconecta_bd()
+
 class Aplicacao_Login(Login):
     def __init__(self):
-# - - Construtores - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
         self.TelaDeLogin = TelaDeLogin
         self.tela_login()
         self.labels_login()
@@ -78,47 +117,12 @@ class Aplicacao_Login(Login):
 
         self.l_senha = Label(self.TelaDeLogin, text="Senha", font=("Courier", 13, "italic", "bold"), bg=co3, fg=co10)
         self.l_senha.place(x=110, y=65)
-        self.e_senha = Entry(self.TelaDeLogin, justify='center', relief='raised', bg=co2, fg=co10) #show="*",
+        self.e_senha = Entry(self.TelaDeLogin, show="*", justify='center', relief='raised', bg=co2, fg=co10)
         self.e_senha.place(x=100, y=90, width=100)
 
 # - - Botão Entrar - - - - - - - - - - - - - - - - - - - - - - - - - -
     def botao(self):
         self.b_entrar = Button(self.TelaDeLogin, text="Entrar", command=self.entra, font=("Courier", 13, "italic", "bold"), bg=co3, fg=co10)
         self.b_entrar.place(x=100, y=150, width=100)
-
-# - - Função Entrar - - - - - - - - - - - - - - - -
-    def entra(self):
-        self.conecta_bd()
-        self.login = self.e_login.get()
-        self.senha = self.e_senha.get()
-
-        self.valida_login = self.cursor.execute(f"""SELECT login from funcionario where login = '{self.login}'""")
-        self.valida_login = self.cursor.fetchone()
-        self.valida_login = self.valida_login[0]
-
-        self.valida_senha = self.cursor.execute(f"""SELECT senha FROM funcionario where login = '{self.login}';""")
-        self.valida_senha = self.cursor.fetchone()
-        self.valida_senha = self.valida_senha[0]
-
-        if self.valida_login == '':
-            messagebox.showerror(title="Acesso Negado", message="Usuário não informado!")
-
-        elif self.valida_login is not None:
-            if self.valida_senha == self.senha:
-                self.TelaDeLogin.destroy()
-                call(["python", "Tela_Janela_Principal.py"])
-
-            elif self.valida_senha == '':
-                messagebox.showerror(title="Acesso Negado", message="Dados informados incorretos.")
-
-            elif self.valida_senha != self.senha:
-                messagebox.showerror(title="Acesso Negado", message="Senha incorreta!")
-
-
-        elif self.valida_login is None:
-            messagebox.showerror(title="Acesso Negado", message="Dados informados incorretos!")
-
-        self.limpaTela()
-        self.desconecta_bd()
 
 Aplicacao_Login()

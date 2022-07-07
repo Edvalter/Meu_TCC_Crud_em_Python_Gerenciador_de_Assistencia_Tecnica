@@ -32,17 +32,20 @@ co2 = "#403d3d"  # letra
 co3 = "#333333"  # azul escuro / fundo da tela / fundo dos label
 co4 = "#666666"  # roxo claro / fundo do frame
 co5 = "#759fe6"  # cor da borda - highlightbackground
-co6 = "#A8A8A8"  # cinza
+
 co7 = "#6aabb5"  # Botão Adicionar
 co8 = "#ffff99"  # Botão Alterar
-co9 = "#d54c4a"  # botão excluir
-co10 = "Black"
+
+co9 = "orange"  # em uso = laranja botão excluir
+co6 = "#A8A8A8"  # em uso = cinza  fundo dos labels e do frame
+co10 = "Black" # em uso = cor da fonte
 
 LETRAS = font=('Ivy 10 bold')
 
 # - - janela Cadastro de Pessoas - -
 
 cadpessoas = Tk()
+
 
 class Relatorio():
     def imprimir(self):
@@ -105,7 +108,7 @@ class Funcao_Pessoas():
     def monta_Tabela_Pessoas(self):
         self.conecta_bd()
         self.cursor.execute("""
-                CREATE TABLE IF NOT EXISTS cad_pessoas(
+                CREATE TABLE IF NOT EXISTS pessoas(
                     id_pessoa INTEGER AUTO_INCREMENT,
                     cpf VARCHAR(100),
                     nome VARCHAR(100),
@@ -245,6 +248,8 @@ class Funcao_Pessoas():
                 id_pessoa = %s """, (
                 self.id_pessoa,))
 
+        messagebox.showinfo(title="Cadastro de Pessoas", message="Cadastro Excluído com sucesso")
+
         self.conn.commit()
         self.desconecta_bd()
         self.limpa_Tela_Pessoas()
@@ -291,6 +296,8 @@ class Funcao_Pessoas():
                      self.status_pessoa,
                      self.dataConvertida,
                      self.id_pessoa))
+
+            messagebox.showinfo(title="Cadastro de Pessoas", message="Cadastro Alterado com Sucesso")
 
             self.conn.commit()
             self.desconecta_bd()
@@ -417,112 +424,115 @@ class Aplicacao_Pessoas(Funcao_Pessoas, Relatorio):
     def tela_cadastro_Pessoas(self):
         self.cadpessoas.title("Cadastro de Pessoas")
         self.cadpessoas.config(bg="#1e3743")
-        self.cadpessoas.geometry("1095x680+263+0")
+        self.cadpessoas.geometry("1095x700+263+0")
 
     def frames_cad_pessoas(self):
-        self.frame_superior_pessoas = Frame(self.cadpessoas, bd=4, bg=co4, highlightbackground=co5, highlightthickness=6)
+        self.frame_superior_pessoas = Frame(self.cadpessoas, bd=4, bg=co6, highlightbackground=co5, highlightthickness=6)
         self.frame_superior_pessoas.place(x=10, y=10, height=300, width=1075)
 
         self.frame_grid_pessoas = Frame(self.cadpessoas, height=418, width=1075, bg=co0, highlightbackground=co5, highlightthickness=6)
-        self.frame_grid_pessoas.place(x=10, y=330, height=340, width=1075)
+        self.frame_grid_pessoas.place(x=10, y=325, height=360, width=1075)
 
     def labels_entry_pessoas(self):
-        self.l_id_pessoa= Label(self.frame_superior_pessoas, text="Código:", justify='right', font=("Courier", 13, "italic", "bold"), bg=co4, fg=co0)
-        self.l_id_pessoa.place(x=50, y=10)
+        self.l_id_pessoa= Label(self.frame_superior_pessoas, text="Código:", justify='right', font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
+        self.l_id_pessoa.place(x=75, y=10)
         self.e_id_pessoa = Entry(self.frame_superior_pessoas, width=45, justify='left', relief='raised', bg=co0, fg=co10)
-        self.e_id_pessoa.place(x=125, y=10)
+        self.e_id_pessoa.place(x=150, y=10)
 
-        self.l_cpf = Label(self.frame_superior_pessoas, text="CPF:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co0)
-        self.l_cpf.place(x=555, y=10)
+        self.l_cpf = Label(self.frame_superior_pessoas, text="CPF:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
+        self.l_cpf.place(x=605, y=10)
         self.e_cpf = Entry(self.frame_superior_pessoas, width=45, justify='left', relief='raised', bg=co0, fg=co10)
-        self.e_cpf.place(x=600, y=10)
+        self.e_cpf.place(x=650, y=10)
 
-        self.l_nome = Label(self.frame_superior_pessoas, text="Nome:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co0)
-        self.l_nome.place(x=70, y=35)
+        self.l_nome = Label(self.frame_superior_pessoas, text="Nome:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
+        self.l_nome.place(x=95, y=35)
         self.e_nome = Entry(self.frame_superior_pessoas, width=45, justify='left', relief='raised', bg=co0, fg=co10)
-        self.e_nome.place(x=125, y=35)
+        self.e_nome.place(x=150, y=35)
 
-        self.l_telefone = Label(self.frame_superior_pessoas, text="Telefone:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co0)
-        self.l_telefone.place(x=505, y=35)
+        self.l_telefone = Label(self.frame_superior_pessoas, text="Telefone:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
+        self.l_telefone.place(x=555, y=35)
         self.e_telefone = Entry(self.frame_superior_pessoas, width=45, justify='left', relief='raised', bg=co0, fg=co10)
-        self.e_telefone.place(x=600, y=35)
+        self.e_telefone.place(x=650, y=35)
 
-        self.l_whatsapp = Label(self.frame_superior_pessoas, text="Whatsapp:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co0)
-        self.l_whatsapp.place(x=30, y=60)
+        self.l_whatsapp = Label(self.frame_superior_pessoas, text="Whatsapp:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
+        self.l_whatsapp.place(x=55, y=60)
         self.e_whatsapp = Entry(self.frame_superior_pessoas, width=45, justify='left', relief='raised', bg=co0, fg=co10)
-        self.e_whatsapp.place(x=125, y=60)
+        self.e_whatsapp.place(x=150, y=60)
 
-        self.l_email = Label(self.frame_superior_pessoas, text="E-mail:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co0)
-        self.l_email.place(x=525, y=60)
+        self.l_email = Label(self.frame_superior_pessoas, text="E-mail:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
+        self.l_email.place(x=575, y=60)
         self.e_email = Entry(self.frame_superior_pessoas, width=45, justify='left', relief='raised', bg=co0, fg=co10)
-        self.e_email.place(x=600, y=60)
+        self.e_email.place(x=650, y=60)
 
-        self.l_cep = Label(self.frame_superior_pessoas, text="CEP:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co0)
-        self.l_cep.place(x=80, y=85)
+        self.l_cep = Label(self.frame_superior_pessoas, text="CEP:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
+        self.l_cep.place(x=105, y=85)
         self.e_cep = Entry(self.frame_superior_pessoas, width=45, justify='left', relief='raised', bg=co0, fg=co10)
-        self.e_cep.place(x=125, y=85)
+        self.e_cep.place(x=150, y=85)
 
-        self.l_rua = Label(self.frame_superior_pessoas, text="Rua:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co0)
-        self.l_rua.place(x=555, y=85)
+        self.l_rua = Label(self.frame_superior_pessoas, text="Rua:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
+        self.l_rua.place(x=605, y=85)
         self.e_rua = Entry(self.frame_superior_pessoas, width=45, justify='left', relief='raised', bg=co0, fg=co10)
-        self.e_rua.place(x=600, y=85)
+        self.e_rua.place(x=650, y=85)
 
-        self.l_numero = Label(self.frame_superior_pessoas, text="Número:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co0)
-        self.l_numero.place(x=50, y=110)
+        self.l_numero = Label(self.frame_superior_pessoas, text="Número:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
+        self.l_numero.place(x=75, y=110)
         self.e_numero = Entry(self.frame_superior_pessoas, width=45, justify='left', relief='raised', bg=co0, fg=co10)
-        self.e_numero.place(x=125, y=110)
+        self.e_numero.place(x=150, y=110)
 
-        self.l_bairro = Label(self.frame_superior_pessoas, text="Bairro:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co0)
-        self.l_bairro.place(x=525, y=110)
+        self.l_bairro = Label(self.frame_superior_pessoas, text="Bairro:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
+        self.l_bairro.place(x=575, y=110)
         self.e_bairro = Entry(self.frame_superior_pessoas, width=45, justify='left', relief='raised', bg=co0, fg=co10)
-        self.e_bairro.place(x=600, y=110)
+        self.e_bairro.place(x=650, y=110)
 
-        self.l_cidade = Label(self.frame_superior_pessoas, text="Cidade:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co0)
-        self.l_cidade.place(x=50, y=135)
+        self.l_cidade = Label(self.frame_superior_pessoas, text="Cidade:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
+        self.l_cidade.place(x=75, y=135)
         self.e_cidade = Entry(self.frame_superior_pessoas, width=45, justify='left', relief='raised', bg=co0, fg=co10)
-        self.e_cidade.place(x=125, y=135)
+        self.e_cidade.place(x=150, y=135)
 
-        self.l_estado = Label(self.frame_superior_pessoas, text="Estado:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co0)
-        self.l_estado.place(x=525, y=135)
+        self.l_estado = Label(self.frame_superior_pessoas, text="Estado:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
+        self.l_estado.place(x=575, y=135)
         self.e_estado = Entry(self.frame_superior_pessoas, width=45, justify='left', relief='raised', bg=co0, fg=co10)
-        self.e_estado.place(x=600, y=135)
+        self.e_estado.place(x=650, y=135)
 
-        self.l_observacoes = Label(self.frame_superior_pessoas, text="Observações:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co0)
-        self.l_observacoes.place(x=0, y=160)
+        self.l_observacoes = Label(self.frame_superior_pessoas, text="Observações:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
+        self.l_observacoes.place(x=25, y=160)
         self.e_observacoes = Entry(self.frame_superior_pessoas, width=45, justify='left', relief='raised', bg=co0, fg=co10)
-        self.e_observacoes.place(x=125, y=160)
+        self.e_observacoes.place(x=150, y=160)
 
-        self.l_data = Label(self.frame_superior_pessoas, text="Data de Cadastro:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co0)
-        self.l_data.place(x=425, y=160)
+        self.l_data = Label(self.frame_superior_pessoas, text="Data de Cadastro:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
+        self.l_data.place(x=475, y=160)
         self.e_data_cadastro = DateEntry(self.frame_superior_pessoas, width=42, justify='left', relief='raised', locale="pt_br")
-        self.e_data_cadastro.place(x=600, y=160)
+        self.e_data_cadastro.place(x=650, y=160)
 
-        self.l_status_pessoa = Label(self.frame_superior_pessoas, text="Status:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co0)
-        self.l_status_pessoa.place(x=45, y=185)
+        self.l_status_pessoa = Label(self.frame_superior_pessoas, text="Status:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
+        self.l_status_pessoa.place(x=70, y=185)
         self.c_status_pessoa = Combobox(self.frame_superior_pessoas, width=42)
         self.c_status_pessoa["values"] = ("Cliente", "Funcionário")
         self.c_status_pessoa.set("Cliente")
-        self.c_status_pessoa.place(x=125, y=185)
+        self.c_status_pessoa.place(x=150, y=185)
 
 
     def botoes_tela_pessoas(self):
-        self.b_limpar = Button(self.frame_superior_pessoas, text="Limpar", command=self.limpa_Tela_Pessoas, width=10,font=("Courier", 13, "italic", "bold"), bg=co6, fg=co2, relief=RAISED, overrelief=RIDGE)
-        self.b_limpar.place(x=280, y=225, height=40, width=100)
+        self.b_imprimir = Button(self.frame_superior_pessoas, text="Imprimir", command=self.geraRelatorio,
+                                 font=("Courier", 13, "italic", "bold"), bg=co1, fg=co2, relief=RAISED, overrelief=RIDGE)
+        self.b_imprimir.place(x=270, y=225, height=40, width=100)
 
-        self.b_procurar = Button(self.frame_superior_pessoas, text="Procurar", command=self.buscar_Pessoa, width=10, font=("Courier", 13, "italic", "bold"), bg=co6, fg=co2, relief=RAISED, overrelief=RIDGE)
-        self.b_procurar.place(x=390, y=225, height=40, width=100)
+        self.b_limpar = Button(self.frame_superior_pessoas, text="Limpar", command=self.limpa_Tela_Pessoas, width=10,font=("Courier", 13, "italic", "bold"), bg=co1, fg=co2, relief=RAISED, overrelief=RIDGE)
+        self.b_limpar.place(x=380, y=225, height=40, width=100)
+
+        self.b_procurar = Button(self.frame_superior_pessoas, text="Procurar", command=self.buscar_Pessoa, width=10, font=("Courier", 13, "italic", "bold"), bg=co1, fg=co2, relief=RAISED, overrelief=RIDGE)
+        self.b_procurar.place(x=490, y=225, height=40, width=100)
 
         self.b_adicionar = Button(self.frame_superior_pessoas, text="Adicionar", command=self.adiciona_Pessoa, width=10, font=("Courier", 13, "italic", "bold"), bg=co7, fg=co2, relief=RAISED, overrelief=RIDGE)
-        self.b_adicionar.place(x=500, y=225, height=40, width=100)
+        self.b_adicionar.place(x=600, y=225, height=40, width=100)
 
         self.b_alterar = Button(self.frame_superior_pessoas, text="Alterar", command=self.altera_Pessoa, width=10, font=("Courier", 13, "italic", "bold"), bg=co8, fg=co2, relief=RAISED, overrelief=RIDGE)
-        self.b_alterar.place(x=610, y=225, height=40, width=100)
+        self.b_alterar.place(x=710, y=225, height=40, width=100)
 
         self.b_excluir = Button(self.frame_superior_pessoas, text="Excluir", command=self.deleta_Pessoa, width=10, font=("Courier", 13, "italic", "bold"), bg=co9, fg=co2, relief=RAISED, overrelief=RIDGE)
-        self.b_excluir.place(x=720, y=225, height=40, width=100)
+        self.b_excluir.place(x=820, y=225, height=40, width=100)
 
-        self.b_imprimir = Button(self.frame_superior_pessoas, text="Imprimir", command=self.geraRelatorio, width=10, font=("Courier", 13, "italic", "bold"), bg=co6, fg=co2, relief=RAISED, overrelief=RIDGE)
-        self.b_imprimir.place(x=830, y=225, height=40, width=100)
+
 
     def grid_Pessoas(self):
         self.listapessoas = ttk.Treeview(self.frame_grid_pessoas, columns=("col0", "col1", "col2", "col3", "col4", "col5", "col6", "col7", "col8", "col9", "col10", "col11", "col12", "col13", "col14"""))
@@ -544,8 +554,8 @@ class Aplicacao_Pessoas(Funcao_Pessoas, Relatorio):
         self.listapessoas.heading("#15", text="Data Cadastro")
 
         self.listapessoas.column("#0", anchor='center', width=1)
-        self.listapessoas.column("#1", anchor='center', width=65)
-        self.listapessoas.column("#2", anchor='center', width=65)
+        self.listapessoas.column("#1", anchor='center', width=45)
+        self.listapessoas.column("#2", anchor='center', width=70)
         self.listapessoas.column("#3", anchor='center',  width=65)
         self.listapessoas.column("#4", anchor='center',  width=65)
         self.listapessoas.column("#5", anchor='center', width=65)
@@ -560,7 +570,7 @@ class Aplicacao_Pessoas(Funcao_Pessoas, Relatorio):
         self.listapessoas.column("#14", anchor='center', width=65)
         self.listapessoas.column("#15", anchor='center', width=65)
 
-        self.listapessoas.place(x=0, y=0, height=328, width=1050)
+        self.listapessoas.place(x=0, y=0, height=325, width=1050)
 
         self.barra_vertical = ttk.Scrollbar(self.frame_grid_pessoas, orient='vertical', command=self.listapessoas.yview)
         self.barra_vertical.place(x=1048, y=0, height=328, width=15)

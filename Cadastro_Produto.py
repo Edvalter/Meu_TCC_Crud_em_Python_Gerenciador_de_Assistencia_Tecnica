@@ -1,5 +1,6 @@
 
 
+
 import os
 import pickle
 import sys
@@ -21,11 +22,14 @@ co2 = "#403d3d"  # letra
 co3 = "#333333"  # azul escuro / fundo da tela / fundo dos label
 co4 = "#666666"  # roxo claro / fundo do frame
 co5 = "#759fe6"  # cor da borda - highlightbackground
-co6 = "#A8A8A8"  # cinza
 co7 = "#6aabb5"  # Botão Adicionar
 co8 = "#ffff99"  # Botão Alterar
-co9 = "#d54c4a"  # botão excluir
-co10 = "white"
+
+
+co9 = "orange"  # em uso = laranja botão excluir
+co6 = "#A8A8A8"  # em uso = cinza  fundo dos labels e do frame
+co10 = "Black" # em uso = cor da fonte
+co11 = "white" # em uso no fundo do grid
 
 # - - janela Cadastro de Produtos - -
 
@@ -53,7 +57,7 @@ class Funcao():
     def montatabelas(self):
         self.conecta_bd()
         self.cursor.execute("""
-                CREATE TABLE IF NOT EXISTS cad_produto(
+                CREATE TABLE IF NOT EXISTS produto(
                 id_produto INTEGER AUTO_INCREMENT,
                 produto VARCHAR(100) NOT NULL,
                 marca VARCHAR(100) NOT NULL,
@@ -87,7 +91,7 @@ class Funcao():
             self.conecta_bd()
             self.cursor.execute("""
                 INSERT INTO
-                    cad_produto (
+                    produto (
                         produto, 
                         marca, 
                         modelo, 
@@ -115,13 +119,7 @@ class Funcao():
     def select_Produto(self):
         self.listaproduto.delete(*self.listaproduto.get_children())
         self.conecta_bd()
-        lista = self.cursor.execute("""
-            SELECT * FROM 
-                cad_produto 
-            ORDER BY 
-                marca 
-            ASC; """)
-
+        lista = self.cursor.execute(""" SELECT * FROM produto ORDER BY id_produto ASC; """)
         lista = self.cursor.fetchall()
 
         for i in lista:
@@ -147,12 +145,13 @@ class Funcao():
     def deleta_Produto(self):
         self.produtos_Variaveis()
         self.conecta_bd()
-        self.cursor.execute("""
+        self.cursor.execute(f"""
             DELETE FROM 
-                cad_produto 
+                produto 
             WHERE
-                id_produto = %s """,
-                (self.id_produto,))
+                id_produto = %s """, (self.id_produto,))
+
+        messagebox.showinfo(title="Cadastrado de Produto", message="Produto Excluído")
 
         self.conn.commit()
         self.desconecta_bd()
@@ -164,7 +163,7 @@ class Funcao():
         self.conecta_bd()
         self.cursor.execute("""
             UPDATE 
-                cad_produto
+                produto
             SET 
                 produto = %s, 
                 marca = %s, 
@@ -184,6 +183,8 @@ class Funcao():
                 self.estoque,
                 self.id_produto))
 
+        messagebox.showinfo(title="Cadastrado de Produto", message="Produto Alterado")
+
         self.conn.commit()
         self.desconecta_bd()
         self.select_Produto()
@@ -197,69 +198,27 @@ class Funcao():
         marca = self.e_marca.get()
         modelo = self.e_modelo.get()
         cor = self.e_cor.get()
-
-        if len(produto) > 0:
-
-            self.e_produto.insert(END, "%")
-            produto = self.e_produto.get()
-            self.cursor.execute("""
+        if len(produto) > 0 or len(marca) > 0 or len(modelo) > 0 or len(cor) > 0:
+            self.e_produto.insert(END, "")
+            self.cursor.execute(f"""
                 SELECT * FROM 
-                    cad_produto
+                    produto
                 WHERE 
                     produto 
-                LIKE '%s' ORDER BY produto ASC""" % produto, )
+                LIKE '%{produto}%' 
+                and marca 
+                LIKE '%{marca}%'
+                and modelo 
+                LIKE '%{modelo}%'
+                and cor 
+                LIKE '%{cor}%'
+                ORDER BY id_produto;""")
 
             buscaproduto = self.cursor.fetchall()
 
             for i in buscaproduto:
                 self.listaproduto.insert("", END, values=i)
 
-        elif len(marca) > 0:
-            self.e_marca.insert(END, "%")
-            marca = self.e_marca.get()
-            self.cursor.execute("""
-                SELECT * FROM 
-                    cad_produto 
-                WHERE 
-                    marca 
-                LIKE '%s' ORDER BY marca ASC""" % marca, )
-            buscamarca = self.cursor.fetchall()
-
-            for i in buscamarca:
-                self.listaproduto.insert("", END, values=i)
-
-        elif len(modelo) > 0:
-            self.e_modelo.insert(END, "%")
-            modelo = self.e_modelo.get()
-            self.cursor.execute("""
-                SELECT * FROM 
-                    cad_produto 
-                WHERE 
-                    modelo 
-                LIKE '%s' ORDER BY marca ASC""" % modelo, )
-            buscamodelo = self.cursor.fetchall()
-
-            for i in buscamodelo:
-                self.listaproduto.insert("", END, values=i)
-
-            self.limpa_tela()
-            self.desconecta_bd()
-
-        elif len(cor) > 0:
-            self.e_cor.insert(END, "%")
-            cor = self.e_cor.get()
-            self.cursor.execute("""
-                SELECT * FROM 
-                    cad_produto 
-                WHERE 
-                    cor 
-                LIKE '%s' ORDER BY cor ASC""" % cor, )
-            buscacor = self.cursor.fetchall()
-
-            for i in buscacor:
-                self.listaproduto.insert("", END, values=i)
-
-        self.limpa_tela()
         self.desconecta_bd()
 
 class Aplicacao_Produto(Funcao):
@@ -277,71 +236,71 @@ class Aplicacao_Produto(Funcao):
     def tela_cadastro_produto(self):
         self.cad_produto.title("Cadastro de Produto")
         self.cad_produto.config(bg=co3)
-        self.cad_produto.geometry("1095x680+263+0")
+        self.cad_produto.geometry("1095x700+263+0")
 
     def frames_cad_produto(self):
-        self.frame_superior = Frame(self.cad_produto, bd=4, bg=co4, highlightbackground=co5, highlightthickness=6)
+        self.frame_superior = Frame(self.cad_produto, bd=4, bg=co6, highlightbackground=co5, highlightthickness=6)
         self.frame_superior.place(x=10, y=10, height=250, width=1075)
 
-        self.frame_grid = Frame(self.cad_produto, height=418, width=1075, bg=co10, highlightbackground=co5, highlightthickness=6)
-        self.frame_grid.place(x=10, y=280, height=380, width=1075)
+        self.frame_grid = Frame(self.cad_produto, height=418, width=1075, bg=co11, highlightbackground=co5, highlightthickness=6)
+        self.frame_grid.place(x=10, y=280, height=400, width=1075)
 
     def labels_entry(self):
-        self.l_id_produto = Label(self.frame_superior, text="Código:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
-        self.l_id_produto.place(x=15, y=10)
-        self.e_id_produto = Entry(self.frame_superior, width=45, justify='left', relief='raised', bg=co2, fg=co10)
-        self.e_id_produto.place(x=90, y=10)
+        self.l_id_produto = Label(self.frame_superior, text="Código:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
+        self.l_id_produto.place(x=65, y=10)
+        self.e_id_produto = Entry(self.frame_superior, width=45, justify='left', relief='raised', bg=co0, fg=co10)
+        self.e_id_produto.place(x=140, y=10)
 
-        self.l_produto = Label(self.frame_superior, text="Produto:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
-        self.l_produto.place(x=5, y=35)
-        self.e_produto = Entry(self.frame_superior, width=45, justify='left', relief='raised', bg=co2, fg=co10)
-        self.e_produto.place(x=90, y=35)
+        self.l_produto = Label(self.frame_superior, text="Produto:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
+        self.l_produto.place(x=55, y=35)
+        self.e_produto = Entry(self.frame_superior, width=45, justify='left', relief='raised', bg=co0, fg=co10)
+        self.e_produto.place(x=140, y=35)
 
-        self.l_marca = Label(self.frame_superior, text="Marca:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
-        self.l_marca.place(x=25, y=60)
-        self.e_marca = Entry(self.frame_superior, width=45, justify='left', relief='raised', bg=co2, fg=co10)
-        self.e_marca.place(x=90, y=60)
+        self.l_marca = Label(self.frame_superior, text="Marca:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
+        self.l_marca.place(x=75, y=60)
+        self.e_marca = Entry(self.frame_superior, width=45, justify='left', relief='raised', bg=co0, fg=co10)
+        self.e_marca.place(x=140, y=60)
 
-        self.l_modelo = Label(self.frame_superior, text="Modelo:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
-        self.l_modelo.place(x=15, y=85)
-        self.e_modelo = Entry(self.frame_superior, width=45, justify='left', relief='raised', bg=co2, fg=co10)
-        self.e_modelo.place(x=90, y=85)
+        self.l_modelo = Label(self.frame_superior, text="Modelo:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
+        self.l_modelo.place(x=65, y=85)
+        self.e_modelo = Entry(self.frame_superior, width=45, justify='left', relief='raised', bg=co0, fg=co10)
+        self.e_modelo.place(x=140, y=85)
 
-        self.l_valor_compra = Label(self.frame_superior, text="Valor de Compra:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
-        self.l_valor_compra.place(x=440, y=10)
-        self.e_valor_compra = Entry(self.frame_superior, width=45, justify='left', relief='raised', bg=co2, fg=co10)
-        self.e_valor_compra.place(x=610, y=10)
+        self.l_valor_compra = Label(self.frame_superior, text="Valor de Compra:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
+        self.l_valor_compra.place(x=485, y=10)
+        self.e_valor_compra = Entry(self.frame_superior, width=45, justify='left', relief='raised', bg=co0, fg=co10)
+        self.e_valor_compra.place(x=650, y=10)
 
-        self.l_valor_venda = Label(self.frame_superior, text="Valor de Venda:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
-        self.l_valor_venda.place(x=450, y=35)
-        self.e_valor_venda = Entry(self.frame_superior, width=45, justify='left', relief='raised', bg=co2, fg=co10)
-        self.e_valor_venda.place(x=610, y=35)
+        self.l_valor_venda = Label(self.frame_superior, text="Valor de Venda:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
+        self.l_valor_venda.place(x=495, y=35)
+        self.e_valor_venda = Entry(self.frame_superior, width=45, justify='left', relief='raised', bg=co0, fg=co10)
+        self.e_valor_venda.place(x=650, y=35)
 
-        self.l_cor = Label(self.frame_superior, text="Cor:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
-        self.l_cor.place(x=560, y=60)
-        self.e_cor = Entry(self.frame_superior, width=45, justify='left', relief='raised', bg=co2, fg=co10)
-        self.e_cor.place(x=610, y=60)
+        self.l_cor = Label(self.frame_superior, text="Cor:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
+        self.l_cor.place(x=605, y=60)
+        self.e_cor = Entry(self.frame_superior, width=45, justify='left', relief='raised', bg=co0, fg=co10)
+        self.e_cor.place(x=650, y=60)
 
-        self.l_estoque = Label(self.frame_superior, text="Estoque:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
-        self.l_estoque.place(x=520, y=85)
-        self.e_estoque = Entry(self.frame_superior, width=45, justify='left', relief='raised', bg=co2, fg=co10)
-        self.e_estoque.place(x=610, y=85)
+        self.l_estoque = Label(self.frame_superior, text="Estoque:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
+        self.l_estoque.place(x=565, y=85)
+        self.e_estoque = Entry(self.frame_superior, width=45, justify='left', relief='raised', bg=co0, fg=co10)
+        self.e_estoque.place(x=650, y=85)
 
     def botoes(self):
-        self.b_limpar = Button(self.frame_superior, text="Limpar", command=self.limpa_tela, width=10, font=("Courier", 13, "italic", "bold"), bg=co6, fg=co2, relief=RAISED, overrelief=RIDGE)
-        self.b_limpar.place(x=280, y=130, height=40, width=100)
+        self.b_limpar = Button(self.frame_superior, text="Limpar", command=self.limpa_tela, font=("Courier", 13, "italic", "bold"), bg=co1, fg=co2, relief=RAISED, overrelief=RIDGE)
+        self.b_limpar.place(x=380, y=150, height=40, width=100)
 
-        self.b_procurar = Button(self.frame_superior, text="Procurar", command=self.buscar_Produto, width=10, font=("Courier", 13, "italic", "bold"), bg=co6, fg=co2, relief=RAISED, overrelief=RIDGE)
-        self.b_procurar.place(x=390, y=130, height=40, width=100)
+        self.b_procurar = Button(self.frame_superior, text="Procurar", command=self.buscar_Produto, font=("Courier", 13, "italic", "bold"), bg=co1, fg=co2, relief=RAISED, overrelief=RIDGE)
+        self.b_procurar.place(x=490, y=150, height=40, width=100)
 
-        self.b_adicionar = Button(self.frame_superior, text="Adicionar", command=self.adiciona_Produto, width=10, font=("Courier", 13, "italic", "bold"), bg=co7, fg=co2, relief=RAISED, overrelief=RIDGE)
-        self.b_adicionar.place(x=500, y=130, height=40, width=100)
+        self.b_adicionar = Button(self.frame_superior, text="Adicionar", command=self.adiciona_Produto, font=("Courier", 13, "italic", "bold"), bg=co7, fg=co2, relief=RAISED, overrelief=RIDGE)
+        self.b_adicionar.place(x=600, y=150, height=40, width=100)
 
-        self.b_alterar = Button(self.frame_superior, text="Alterar", command=self.altera_Produto, width=10, font=("Courier", 13, "italic", "bold"), bg=co8, fg=co2, relief=RAISED, overrelief=RIDGE)
-        self.b_alterar.place(x=610, y=130, height=40, width=100)
+        self.b_alterar = Button(self.frame_superior, text="Alterar", command=self.altera_Produto, font=("Courier", 13, "italic", "bold"), bg=co8, fg=co2, relief=RAISED, overrelief=RIDGE)
+        self.b_alterar.place(x=710, y=150, height=40, width=100)
 
         self.b_excluir = Button(self.frame_superior, text="Excluir", command=self.deleta_Produto, width=10, font=("Courier", 13, "italic", "bold"), bg=co9, fg=co2, relief=RAISED, overrelief=RIDGE)
-        self.b_excluir.place(x=720, y=130, height=40, width=100)
+        self.b_excluir.place(x=820, y=150, height=40, width=100)
 
     def grid_produto(self):
         self.listaproduto = ttk.Treeview(self.frame_grid, columns=("col0", "col1", "col2", "col3", "col4", "col5", "col6", "col7"))
@@ -365,13 +324,13 @@ class Aplicacao_Produto(Funcao):
         self.listaproduto.column("#7", anchor='center', width=120)
         self.listaproduto.column("#8", anchor='center', width=120)
 
-        self.listaproduto.place(x=10, y=10, height=340, width=1035)
+        self.listaproduto.place(x=0, y=0, height=375, width=1055)
 
         self.barra_vertical = ttk.Scrollbar(self.frame_grid, orient='vertical', command=self.listaproduto.yview)
-        self.barra_vertical.place(x=1048, y=0, height=369, width=15)
+        self.barra_vertical.place(x=1050, y=0, height=388, width=15)
 
         self.barra_horizontal = ttk.Scrollbar(self.frame_grid, orient='horizontal', command=self.listaproduto.xview)
-        self.barra_horizontal.place(x=0, y=354, height=15, width=1050)
+        self.barra_horizontal.place(x=0, y=373, height=15, width=1050)
 
         self.listaproduto.configure(yscrollcommand=self.barra_vertical.set, xscrollcommand=self.barra_horizontal.set)
 

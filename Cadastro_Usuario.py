@@ -16,11 +16,14 @@ co2 = "#403d3d"  # letra
 co3 = "#333333"  # azul escuro / fundo da tela / fundo dos label
 co4 = "#666666"  # roxo claro / fundo do frame
 co5 = "#759fe6"  # cor da borda - highlightbackground
-co6 = "#A8A8A8"  # cinza
-co7 ="#6aabb5" # Botão Adicionar
-co8 =  "#ffff99" # Botão Alterar
-co9 ="#d54c4a" # botão excluir
-co10 = "white"
+co7 = "#6aabb5"  # Botão Adicionar
+co8 = "#ffff99"  # Botão Alterar
+
+
+co9 = "orange"  # em uso = laranja botão excluir
+co6 = "#A8A8A8"  # em uso = cinza  fundo dos labels e do frame
+co10 = "Black" # em uso = cor da fonte
+co11 = "white" # em uso no fundo do grid
 
 # - - janela Cadastro de Produtos - -
 
@@ -67,8 +70,9 @@ class Funcao():
     def adicionaFuncionario(self):
         self.funcionarioVariaveis()
 
-        if self.e_id_pessoa.get() == "" or self.e_login.get() == ""or self.e_senha.get() == ""or self.e_confirmar_senha.get() == "":
+        if self.e_id_pessoa.get() == "" or self.e_login.get() == "" or self.e_senha.get() == "" or self.e_confirmar_senha.get() == "":
             messagebox.showerror(title="Cadastro de Funcionários", message="Todos os Campos Devem Ser Preenchidos")
+            pass
 
         elif self.e_senha.get() != self.e_confirmar_senha.get():
             messagebox.showerror(title="Cadastro de Funcionários", message="Campo SENHA é diferente do CONFIRMAR SENHA")
@@ -78,10 +82,19 @@ class Funcao():
             self.conecta_bd()
             self.cursor.execute("""
                 INSERT INTO 
-                    funcionario(id_pessoa, nome, login, senha, confirmar_senha)
+                    funcionario(
+                        id_pessoa, 
+                        nome, 
+                        login, 
+                        senha, 
+                        confirmar_senha)
                 VALUES
-                    (%s, %s, %s, %s, %s)""",#md5(%s), md5(%s))
-                                (self.id_pessoa, self.nome, self.login, self.senha, self.confirmar_senha))
+                    (%s, %s, %s, %s, %s)""",
+                        (self.id_pessoa,
+                         self.nome,
+                         self.login,
+                         self.senha,
+                         self.confirmar_senha))
 
             messagebox.showinfo(title="Cadastro de Funcionários", message="Usuário Cadastrado com Sucesso")
 
@@ -94,7 +107,7 @@ class Funcao():
         self.listaPessoas.delete(*self.listaPessoas.get_children())
         self.conecta_bd()
         listaPe = self.cursor.execute("""
-            SELECT id_pessoa, nome FROM pessoas ORDER BY id_pessoa ASC; """)
+            SELECT id_pessoa, nome FROM pessoas where status_pessoa = 'Funcionário' ORDER BY id_pessoa ASC; """)
 
         listaPe = self.cursor.fetchall()
 
@@ -131,7 +144,7 @@ class Funcao():
         self.listaFuncionario.selection()
 
         for n in self.listaFuncionario.selection():
-            col0, col1, col2, col3, col4, col5= self.listaFuncionario.item(n, 'values')
+            col0, col1, col2, col3, col4, col5 = self.listaFuncionario.item(n, 'values')
 
             self.e_id_funcionario.insert(END, col0)
             self.e_id_pessoa.insert(END, col1)
@@ -171,8 +184,8 @@ class Funcao():
                     id_pessoa = %s, 
                     nome = %s, 
                     login = %s, 
-                    senha = md5(%s), 
-                    confirmar_senha = md5(%s)
+                    senha = %s,
+                    confirmar_senha = %s
                 WHERE
                     id_funcionario = %s""", (
                     self.id_pessoa,
@@ -303,70 +316,70 @@ class AplicacaoUsuarios(Funcao):
     def tela_cad_funcionario(self):
         self.cad_funcionario.title("Cadastro de Funcionários")
         self.cad_funcionario.config(bg=co3)
-        self.cad_funcionario.geometry("1095x680+263+0")
+        self.cad_funcionario.geometry("1095x700+263+0")
 
     def frame_Cad_Funcionarios(self):
-        self.frameSuperior = Frame(self.cad_funcionario, height=280, width=1365, bd=4, bg=co4, highlightbackground=co5, highlightthickness=6)
+        self.frameSuperior = Frame(self.cad_funcionario, height=280, width=1365, bd=4, bg=co6, highlightbackground=co5, highlightthickness=6)
         self.frameSuperior.place(x=10, y=10, height=250, width=1075)
 
-        self.frameInferior = Frame(self.cad_funcionario, height=280, width=1365, bd=4, bg=co4, highlightbackground=co5, highlightthickness=6)
-        self.frameInferior.place(x=10, y=280, height=330, width=1075)
+        self.frameInferior = Frame(self.cad_funcionario, height=280, width=1365, bd=4, bg=co6, highlightbackground=co5, highlightthickness=6)
+        self.frameInferior.place(x=10, y=280, height=400, width=1075)
 
         self.framePessoa = Frame(self.frameInferior, bg=co10, highlightbackground=co5, highlightthickness=6)
-        self.framePessoa.place(x=10, y=10, height=250, width=400)
+        self.framePessoa.place(x=10, y=10, height=350, width=400)
 
         self.frameFuncionario = Frame(self.frameInferior, bg=co10, highlightbackground=co5, highlightthickness=6)
-        self.frameFuncionario.place(x=430, y=10, height=250, width=610)
+        self.frameFuncionario.place(x=430, y=10, height=350, width=610)
 
     def labelsFuncionario(self):
-        self.l_id_funcionario = Label(self.frameSuperior, text="Código Usuário:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
+        self.l_id_funcionario = Label(self.frameSuperior, text="Código Usuário:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
         self.l_id_funcionario.place(x=35, y=10)
-        self.e_id_funcionario = Entry(self.frameSuperior, width=45, justify='left', relief='raised', bg=co2, fg=co10)
+        self.e_id_funcionario = Entry(self.frameSuperior, width=45, justify='left', relief='raised', bg=co0, fg=co10)
         self.e_id_funcionario.place(x=190, y=10)
 
-        self.l_id_pessoa = Label(self.frameSuperior, text="Código Pessoa:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
+        self.l_id_pessoa = Label(self.frameSuperior, text="Código Pessoa:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
         self.l_id_pessoa.place(x=45, y=35)
-        self.e_id_pessoa = Entry(self.frameSuperior, width=45, justify='left', relief='raised', bg=co2, fg=co10)
+        self.e_id_pessoa = Entry(self.frameSuperior, width=45, justify='left', relief='raised', bg=co0, fg=co10)
         self.e_id_pessoa.place(x=190, y=35)
 
-        self.l_nome = Label(self.frameSuperior, text="Nome:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
+        self.l_nome = Label(self.frameSuperior, text="Nome:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
         self.l_nome.place(x=135, y=60)
-        self.e_nome = Entry(self.frameSuperior, width=45, justify='left', relief='raised', bg=co2, fg=co10)
+        self.e_nome = Entry(self.frameSuperior, width=45, justify='left', relief='raised', bg=co0, fg=co10)
         self.e_nome.place(x=190, y=60)
 
-        self.l_login = Label(self.frameSuperior, text="Login:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
+        self.l_login = Label(self.frameSuperior, text="Login:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
         self.l_login.place(x=125, y=85)
-        self.e_login = Entry(self.frameSuperior, width=45, justify='left', relief='raised', bg=co2, fg=co10)
+        self.e_login = Entry(self.frameSuperior, width=45, justify='left', relief='raised', bg=co0, fg=co10)
         self.e_login.place(x=190, y=85)
 
-        self.l_senha = Label(self.frameSuperior, text="Senha:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
+        self.l_senha = Label(self.frameSuperior, text="Senha:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
         self.l_senha.place(x=125, y=110)
-        self.e_senha = Entry(self.frameSuperior, width=45, show="*", justify='left', relief='raised', bg=co2, fg=co10)
+        self.e_senha = Entry(self.frameSuperior, width=45, show="*", justify='left', relief='raised', bg=co0, fg=co10)
         self.e_senha.place(x=190, y=110)
 
-        self.l_confirmar_senha = Label(self.frameSuperior, text="Confirme a Senha:", font=("Courier", 13, "italic", "bold"), bg=co4, fg=co10)
+        self.l_confirmar_senha = Label(self.frameSuperior, text="Confirme a Senha:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
         self.l_confirmar_senha.place(x=15, y=135)
-        self.e_confirmar_senha = Entry(self.frameSuperior, width=45, show="*", justify='left', relief='raised', bg=co2, fg=co10)
+        self.e_confirmar_senha = Entry(self.frameSuperior, width=45, show="*", justify='left', relief='raised', bg=co0, fg=co10)
         self.e_confirmar_senha.place(x=190, y=135)
 
     def botoesFuncionario(self):
-        self.b_limpar = Button(self.frameSuperior, text="Limpar", command=self.limpaTela, width=10, font=("Courier", 13, "italic", "bold"), bg=co6, fg=co2, relief=RAISED, overrelief=RIDGE)
-        self.b_limpar.place(x=280, y=185, height=40, width=100)
+        self.b_limpar = Button(self.frameSuperior, text="Limpar", command=self.limpaTela, width=10, font=("Courier", 13, "italic", "bold"), bg=co1, fg=co2, relief=RAISED, overrelief=RIDGE)
+        self.b_limpar.place(x=380, y=185, height=40, width=100)
 
-        self.b_procurarPessoa = Button(self.frameSuperior, text="Procurar\nPessoa", command=self.buscarPessoa, font=("Courier", 13, "italic", "bold"), bg=co6, fg=co2, relief=RAISED, overrelief=RIDGE)
+        self.b_procurarPessoa = Button(self.frameSuperior, text="Procurar\nPessoa", command=self.buscarPessoa, font=("Courier", 13, "italic", "bold"), bg=co1, fg=co2, relief=RAISED, overrelief=RIDGE)
         self.b_procurarPessoa.place(x=470, y=10, height=45, width=100)
 
-        self.b_procurarFuncionario = Button(self.frameSuperior, text="Procurar",  command=self.buscarFuncionario, font=("Courier", 13, "italic", "bold"), bg=co6, fg=co2, relief=RAISED, overrelief=RIDGE)
-        self.b_procurarFuncionario.place(x=390, y=185, height=40, width=100)
+        self.b_procurarFuncionario = Button(self.frameSuperior, text="Procurar",  command=self.buscarFuncionario, font=("Courier", 13, "italic", "bold"), bg=co1, fg=co2, relief=RAISED, overrelief=RIDGE)
+        self.b_procurarFuncionario.place(x=490, y=185, height=40, width=100)
 
         self.b_adicionar = Button(self.frameSuperior, text="Adicionar", command=self.adicionaFuncionario, width=10, font=("Courier", 13, "italic", "bold"), bg=co7, fg=co2, relief=RAISED, overrelief=RIDGE)
-        self.b_adicionar.place(x=500, y=185, height=40, width=100)
+        self.b_adicionar.place(x=600, y=185, height=40, width=100)
 
         self.b_alterar = Button(self.frameSuperior, text="Alterar", command=self.alteraFuncionario, font=("Courier", 13, "italic", "bold"), bg=co8, fg=co2, relief=RAISED, overrelief=RIDGE)
-        self.b_alterar.place(x=610, y=185, height=40, width=100)
+        self.b_alterar.place(x=710, y=185, height=40, width=100)
 
         self.b_excluir = Button(self.frameSuperior, text="Excluir", command=self.deletaFuncionario, font=("Courier", 13, "italic", "bold"), bg=co9, fg=co2, relief=RAISED, overrelief=RIDGE)
-        self.b_excluir.place(x=720, y=185, height=40, width=100)
+        self.b_excluir.place(x=820, y=185, height=40, width=100)
 
     def gridPessoas(self):
         self.listaPessoas = ttk.Treeview(self.framePessoa, columns=("col0", "col1"))
@@ -378,13 +391,13 @@ class AplicacaoUsuarios(Funcao):
         self.listaPessoas.column("#1", anchor='center', width=100)
         self.listaPessoas.column("#2", anchor='center', width=270)
 
-        self.listaPessoas.place(x=2, y=2, height=234, width=381)
+        self.listaPessoas.place(x=0, y=0, height=338, width=388)
 
     def gridFuncionario(self):
         self.listaFuncionario = ttk.Treeview(self.frameFuncionario, columns=("col0", "col1", "col2", "col3"))
         self.listaFuncionario.heading("#0", text="")
-        self.listaFuncionario.heading("#1", text="Código Funcionário")
-        self.listaFuncionario.heading("#2", text="Código")
+        self.listaFuncionario.heading("#1", text="Funcionário")
+        self.listaFuncionario.heading("#2", text="Pessoa")
         self.listaFuncionario.heading("#3", text="Nome")
         self.listaFuncionario.heading("#4", text="Login")
 
@@ -394,8 +407,7 @@ class AplicacaoUsuarios(Funcao):
         self.listaFuncionario.column("#3", anchor='center', width=98)
         self.listaFuncionario.column("#4", anchor='center', width=98)
 
-
-        self.listaFuncionario.place(x=2, y=2, height=234, width=592)
+        self.listaFuncionario.place(x=0, y=0, height=338, width=598)
 
         self.barraVertical = ttk.Scrollbar(self.framePessoa, orient='vertical', command=self.listaFuncionario.yview)
         self.barraVertical.place(x=1048, y=0, height=369, width=15)

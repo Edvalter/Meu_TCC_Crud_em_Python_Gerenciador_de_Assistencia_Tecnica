@@ -1,12 +1,3 @@
-"""
-
-    Criar a logo para ficar aparecendo no fundo da tela, para não ficar tudo preto
-
-        self.root2.focus_force()#força essa janela a ficar na frente
-        self.root2.grab_set()# não deixa clicar"selecionar fora da tela" sem fechar a tela
-
-"""
-
 
 import os
 import pickle
@@ -67,8 +58,8 @@ def abre_orcamento():
 def abre_venda():
    call(["python", "Tela_Venda.py"])
 
-#def abre_relatorio():
-#   call(["python", "Tela_relatorio.py"])
+def abre_relatorio():
+   call(["python", "Tela_relatorio.py"])
 
 
 
