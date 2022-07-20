@@ -64,8 +64,6 @@ class Gerenciar_Assistencia:
                                     font=("Courier", 13, "italic", "bold"), bg="#808000", activebackground="#66FF99",
                                     borderwidth=3)
         b_cadastro_pessoas.place(x=10, y=10, height=60, width=250)
-        # balao_cadastro_pessoas = tix.BALLOON(LeftFrame) não está funcionado
-        # balao_cadastro_pessoas.bind_widget(b_cadastro_pessoas, ballonmsg="Abre a Tela de Cadastro")
 
         b_cadastro_funcionarios = Button(LeftFrame, text="Cadastro de Funcionários", command=abre_cadastro_de_usuarios,
                                          width=40, font=("Courier", 13, "italic", "bold"), bg="#808000",

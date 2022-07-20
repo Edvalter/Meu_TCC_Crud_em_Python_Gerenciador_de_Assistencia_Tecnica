@@ -1,5 +1,7 @@
+
 from tkinter import *
 from tkinter import ttk
+from tkinter.ttk import Combobox
 from tkinter import messagebox
 from tkinter import tix
 from tkinter.tix import *
@@ -13,6 +15,8 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import SimpleDocTemplate, Image
 import webbrowser
+from subprocess import call
+import pywhatkit as kt
 
 database = "gerenciador.db"
 
@@ -22,12 +26,10 @@ co2 = "#403d3d"  # letra
 co3 = "#333333"  # azul escuro / fundo da tela / fundo dos label
 co4 = "#666666"  # roxo claro / fundo do frame
 co5 = "#759fe6"  # cor da borda - highlightbackground
+co6 = "#A8A8A8"  # em uso = cinza  fundo dos labels e do frame
 co7 = "#6aabb5"  # Botão Adicionar
 co8 = "#ffff99"  # Botão Alterar
-
-
 co9 = "orange"  # em uso = laranja botão excluir
-co6 = "#A8A8A8"  # em uso = cinza  fundo dos labels e do frame
 co10 = "Black" # em uso = cor da fonte
 co11 = "white" # em uso no fundo do grid
 
@@ -35,40 +37,109 @@ co11 = "white" # em uso no fundo do grid
 
 orcamento = tix.Tk()
 
-
 class Relatorio():
     def imprimir(self):
-        webbrowser.open("cliente.pdf")
+        webbrowser.open("OS.pdf")
 
     def geraRelatorio(self):
-        self.c = canvas.Canvas("cliente.pdf")
+        self.conecta_bd()
+        self.listaPessoas = self.cursor.execute(f""" 
+            SELECT 
+                id_pessoa, 
+                id_orcamento, 
+                id_produto, 
+                quantidade, 
+                valor_venda, 
+                defeito, 
+                observacao
+                as data_cadastro  FROM produto_orcado ; """)
 
-        self.idPessoaRelatorio = self.e_id_pessoa.get()
-        self.nomeRelatorio = self.e_nome.get()
-        self.whatsappRelatorio = self.e_whatsapp.get()
-        self.data_cadastroRelatorio = self.e_data_cadastro.get()
+        self.listaPessoas = self.cursor.fetchall()
 
-        self.c.setFont("Helvetica-Bold", 18)
-        self.c.drawString(200, 790, 'Ficha do Cliente')
+        self.relatorioOrcamento = canvas.Canvas( "OS.pdf", pagesize=A4) # abre o relatório os
+        self.relatorioOrcamento.drawImage("C:/Users/Edinho/PycharmProjects/Meu_TCC/Logo/LogoE.png", x=30, y=720, width=100, height=130) # imprime a logo no relatório
 
-        self.c.setFont("Helvetica-Bold", 12)
-        self.c.drawString(50, 700, 'Código: ')
-        self.c.drawString(50, 680, 'Nome: ')
-        self.c.drawString(50, 660, 'Telefone: ')
-        self.c.drawString(50, 640, 'Data do Cadastro: ')
+# - - Meu Cabeçalho - - - -
+        self.relatorioOrcamento.setFont("Helvetica", 10)
+        self.relatorioOrcamento.drawString(150, 810,  'Segat - Sistema Gerenciador de assistência Técnica')
+        self.relatorioOrcamento.drawString(150, 795, 'Endereço: R: Quênia 94')
+        self.relatorioOrcamento.drawString(150, 780, 'Centro - Timbó - SC')
+        self.relatorioOrcamento.drawString(150, 765, 'CNPJ: 12.123.12.0001/23')
+        self.relatorioOrcamento.drawString(150, 750, 'Telefone / WhatsApp: (47) 9 9247 9998')
 
-        self.c.setFont("Helvetica", 12)
+# - - Titulo do Relatório- - - -
+        self.relatorioOrcamento.setFont("Helvetica-Bold", 15)
+        self.relatorioOrcamento.drawString(240, 720, 'Ordem de Serviço')
 
-        self.c.drawString(110, 700, self.idPessoaRelatorio)
-        self.c.drawString(90, 680, self.nomeRelatorio)
-        self.c.drawString(110, 660, self.whatsappRelatorio)
-        self.c.drawString(160, 640, self.data_cadastroRelatorio)
+# - - pega as informações dos entry - - - -
+        self.idRel = self.e_id_orcamento.get()
+        self.idPessoaRel = self.e_id_pessoa.get()
+        self.nomeRel = self.e_nome.get()
+        self.telefoneRel = self.e_telefone.get()
+        self.whatsappRel = self.e_whatsapp.get()
+        self.dataEntradaRel = self.e_data_entrada.get()
+        self.dataRetiradaRel = self.e_data_retirada.get()
+        self.produtoRel = self.e_produto.get()
+        self.marcaRel = self.e_marca.get()
+        self.modeloRel = self.e_modelo.get()
+        self.corRel = self.e_cor.get()
+        self.valorRel = self.e_valor_venda.get()
+        self.defeitoRel = self.e_defeito.get()
+        self.observaroRel = self.e_observacao.get()
 
-        self.c.rect(20, 550, 550, 5, fill=True, stroke=False)  # cria o retangulo no final da folha
+# - - - Imprime as chamadas da informações - - - -
+        self.relatorioOrcamento.setFont("Helvetica-Bold", 10)
+        self.relatorioOrcamento.drawString(50, 700, 'OS:')
+        self.relatorioOrcamento.drawString(50, 685, 'Cliente:')
+        self.relatorioOrcamento.drawString(230, 700, 'Telefone:')
+        self.relatorioOrcamento.drawString(230, 685, 'Whatsapp:')
+        self.relatorioOrcamento.drawString(50, 660, 'Produto:')
+        self.relatorioOrcamento.drawString(50, 645, 'Marca:')
+        self.relatorioOrcamento.drawString(50, 630, 'Modelo:')
+        self.relatorioOrcamento.drawString(50, 615, 'Cor:')
+        self.relatorioOrcamento.drawString(420, 700, 'Data de Entrada:')
+        self.relatorioOrcamento.drawString(420, 685, 'Data de Retirada:')
+        self.relatorioOrcamento.drawString(230, 660, 'Valor:')
+        self.relatorioOrcamento.drawString(230, 645, 'Defeito:')
+        self.relatorioOrcamento.drawString(230, 630, 'Observação:')
+        self.relatorioOrcamento.setFont("Helvetica", 10)
+        self.relatorioOrcamento.drawString(260, 660, 'R$ ')
 
-        self.c.showPage()
-        self.c.save()
-        self.imprimir()
+# - - - Imprime as informações - - - -
+        self.relatorioOrcamento.setFont("Helvetica", 10)
+        self.relatorioOrcamento.drawString(75, 700, self.idRel)
+        self.relatorioOrcamento.drawString(90, 685, self.idPessoaRel)
+        self.relatorioOrcamento.drawString(98, 685, self.nomeRel)
+        self.relatorioOrcamento.drawString(280, 700, self.telefoneRel)
+        self.relatorioOrcamento.drawString(285, 685, self.whatsappRel)
+        self.relatorioOrcamento.drawString(505, 700, self.dataEntradaRel)
+        self.relatorioOrcamento.drawString(505, 685, self.dataRetiradaRel)
+        self.relatorioOrcamento.drawString(95, 660, self.produtoRel)
+        self.relatorioOrcamento.drawString(85, 645, self.marcaRel)
+        self.relatorioOrcamento.drawString(90, 630, self.modeloRel)
+        self.relatorioOrcamento.drawString(75, 615, self.corRel)
+        self.relatorioOrcamento.drawString(280, 660, self.valorRel)
+        self.relatorioOrcamento.drawString(270, 645, self.defeitoRel)
+        self.relatorioOrcamento.drawString(295, 630, self.observaroRel)
+
+        # - - - Aviso - - - -
+        self.relatorioOrcamento.setFont("Helvetica", 7)
+        self.relatorioOrcamento.drawString(400, 660, 'Não cubrimos a garantia de aparelhos molhados')
+        self.relatorioOrcamento.drawString(400, 650, 'Não cubrimos a garantia de Software')
+        self.relatorioOrcamento.drawString(400, 640, 'Arrumanos o aparelho mediante entrada')
+        self.relatorioOrcamento.drawString(400, 630, 'Aparelhos com 90 dias em loja, serão vendidos')
+        self.relatorioOrcamento.drawString(400, 620, 'para amenizar o custo')
+
+
+# - - - Rodapé - - - -
+        self.relatorioOrcamento.setFont("Helvetica", 10)
+        self.relatorioOrcamento.drawString(50, 575, 'Ass Cliente:')
+
+# - - - Funções - - - -
+        self.relatorioOrcamento.showPage() # exibe a pagina do PDF
+        self.relatorioOrcamento.save() # Salva o PDF
+        self.imprimir() # Função de Abrir
+
 
 
 class Funcao():
@@ -91,6 +162,8 @@ class Funcao():
         self.e_observacao.delete(0, END)
         self.e_data_entrada.delete(0, END)
         self.e_data_retirada.delete(0, END)
+        self.c_status_orcamento.delete(0, END)
+        self.e_id_orcamento.focus()
 
     def limpa_Tela_Produto_Orcado(self):
         self.e_id_produto.delete(0, END)
@@ -102,6 +175,7 @@ class Funcao():
         self.e_valor_venda.delete(0, END)
         self.e_defeito.delete(0, END)
         self.e_observacao.delete(0, END)
+        self.c_status_orcamento.delete(0, END)
 
 
     def conecta_bd(self):
@@ -114,13 +188,13 @@ class Funcao():
     def montaTabelaOrca(self):
         self.conecta_bd()
         self.cursor.execute("""
-                CREATE TABLE IF NOT EXISTS
-                    orcamento(
-                        id_orcamento INT PRIMARY KEY,
-                        id_pessoa INT,
-                        data_entrada DATE,
-                        data_retirada DATE,
-                CONSTRAINT FOREIGN KEY (id_pessoa) REFERENCES pessoas (id_pessoa));""")
+            CREATE TABLE IF NOT EXISTS
+                orcamento(
+                    id_orcamento INT PRIMARY KEY,
+                    id_pessoa INT,
+                    data_entrada DATE,
+                    data_retirada DATE,
+            CONSTRAINT FOREIGN KEY (id_pessoa) REFERENCES pessoas (id_pessoa));""")
 
         self.conn.commit()
         self.desconecta_bd()
@@ -128,19 +202,19 @@ class Funcao():
     def montaTabelaProdutoOrcado(self):
         self.conecta_bd()
         self.cursor.execute("""
-                CREATE TABLE IF NOT EXISTS 
-                    produto_orcado(
-                        cod_orcamento INT AUTO_INCREMENT, 
-                        id_orcamento INT,
-                        id_pessoa INT, 	
-                        id_produto INT, 
-                        quantidade INT,
-                        valor_venda FLOAT,
-                        defeito VARCHAR(100),
-                        observacao VARCHAR(100),
-                FOREIGN KEY (id_orcamento) REFERENCES orca (id_orcamento),
+                CREATE TABLE IF NOT EXISTS produto_orcado(
+                    cod_orcamento INT AUTO_INCREMENT PRIMARY KEY, 
+                    id_orcamento INT,
+                    id_pessoa INT, 	
+                    id_produto INT, 
+                    quantidade INT,
+                    valor_venda FLOAT,
+                    defeito VARCHAR(100),
+                    observacao VARCHAR(100),
+                    status_orcamento VARCHAR(20),
+                FOREIGN KEY (id_orcamento) REFERENCES orcamento (id_orcamento),
                 FOREIGN KEY (id_pessoa) REFERENCES pessoas (id_pessoa),
-                FOREIGN KEY (id_produto) REFERENCES produto (id_produto));""")
+                FOREIGN KEY (id_produto) REFERENCES produto (id_produto)); """)
 
         self.conn.commit()
         self.desconecta_bd()
@@ -162,6 +236,7 @@ class Funcao():
         self.valor = self.e_valor_venda.get()
         self.defeito = self.e_defeito.get()
         self.observacao = self.e_observacao.get()
+        self.status_orcamento = self.c_status_orcamento.get()
 
         self.data_entrada = self.e_data_entrada.get()
         self.dataEntradaConvertida = self.converteDataEntrada()
@@ -228,16 +303,18 @@ class Funcao():
                         quantidade, 
                         valor_venda, 
                         defeito, 
-                        observacao)
+                        observacao,
+                        status_orcamento)
                  VALUES 
-                        (%s, %s, %s, %s, %s, %s, %s)""", (
+                        (%s, %s, %s, %s, %s, %s, %s, %s) """, (
                         self.id_orcamento,
                         self.id_pessoa,
                         self.id_produto,
                         self.quantidade,
                         self.valor,
                         self.defeito,
-                        self.observacao))
+                        self.observacao,
+                        self.status_orcamento))
 
             messagebox.showinfo(title="Cadastro de Pessoas", message="Cadastro realizado com sucesso")
 
@@ -274,10 +351,9 @@ class Funcao():
         self.listaOrcamento.delete(*self.listaOrcamento.get_children())
         self.conecta_bd()
         lista = self.cursor.execute(f"""
-            SELECT * FROM 
-                produto_orcado 
-            WHERE 
+            SELECT * FROM produto_orcado WHERE 
                 id_orcamento = '{self.e_id_orcamento.get()}' AND id_pessoa = '{self.e_id_pessoa.get()}'; """)
+
         lista = self.cursor.fetchall()
         for i in lista:
             self.listaOrcamento.insert("", END, values=i)
@@ -322,12 +398,15 @@ class Funcao():
             self.e_cor.insert(END, col5)
             self.e_valor_venda.insert(END, col6)
 
+
     def duplo_CliqueOrcamento(self, event):
         self.limpa_Tela()
+        self.conecta_bd()
         self.listaOrcamento.selection()
 
         for n in self.listaOrcamento.selection():
-            col1, col2, col3, col4, col5, col6, col7, col8 = self.listaOrcamento.item(n, 'values')
+            col1, col2, col3, col4, col5, col6, col7, col8, col9, col10, col11, \
+            col12, col13, col14, col15, col16, col17, col18, col19 = self.listaOrcamento.item(n, 'values')
 
             self.e_item.delete(0, END)
             self.e_id_orcamento.delete(0, END)
@@ -337,7 +416,7 @@ class Funcao():
             self.e_valor_venda.delete(0, END)
             self.e_defeito.delete(0, END)
             self.e_observacao.delete(0, END)
-
+            self.c_status_orcamento.delete(0, END)
 
             self.e_item.insert(END, col1)
             self.e_id_orcamento.insert(END, col2)
@@ -347,6 +426,18 @@ class Funcao():
             self.e_valor_venda.insert(END, col6)
             self.e_defeito.insert(END, col7)
             self.e_observacao.insert(END, col8)
+            self.e_nome.insert(END, col9)
+            self.e_cpf.insert(END, col10)
+            self.e_telefone.insert(END, col11)
+            self.e_whatsapp.insert(END, col12)
+            self.e_produto.insert(END, col13)
+            self.e_marca.insert(END, col14)
+            self.e_modelo.insert(END, col15)
+            self.e_cor.insert(END, col16)
+            self.c_status_orcamento.insert(END, col17)
+            self.e_data_entrada.insert(END, col18)
+            self.e_data_retirada.insert(END, col19)
+
 
     def busca_Cliente(self):
         self.conecta_bd()
@@ -358,14 +449,14 @@ class Funcao():
         whatsapp = self.e_whatsapp.get()
 
         if len(id_pessoa) > 0:
-            self.e_id_pessoa.insert(END, "%")
+            self.e_id_pessoa.insert(END, "")
             id_pessoa = self.e_id_pessoa.get()
-            self.cursor.execute("""
+            self.cursor.execute(f"""
                    SELECT id_pessoa, cpf, nome, whatsapp, telefone FROM 
                        pessoas
                    WHERE 
                        id_pessoa 
-                   LIKE '%s' ORDER BY cpf ASC""" % id_pessoa, )
+                   LIKE '%{id_pessoa}%' ORDER BY cpf ASC; """)
 
             buscaid_pessoa = self.cursor.fetchall()
 
@@ -373,28 +464,28 @@ class Funcao():
                 self.listaOrcarmentoCliente.insert("", END, values=i)
 
         elif len(cpf) > 0:
-            self.e_cpf.insert(END, "%")
+            self.e_cpf.insert(END, "")
             cpf = self.e_cpf.get()
-            self.cursor.execute("""
+            self.cursor.execute(f"""
                    SELECT id_pessoa, cpf, nome, whatsapp, telefone FROM 
-                       pessoas 
+                       pessoas
                    WHERE 
                        cpf 
-                   LIKE '%s' ORDER BY nome ASC""" % cpf, )
+                   LIKE '%{cpf}%' ORDER BY cpf ASC; """ )
             buscacpf = self.cursor.fetchall()
 
             for i in buscacpf:
                 self.listaOrcarmentoCliente.insert("", END, values=i)
 
         elif len(nome) > 0:
-            self.e_nome.insert(END, "%")
+            self.e_nome.insert(END, "")
             nome = self.e_nome.get()
-            self.cursor.execute("""
+            self.cursor.execute(f"""
                    SELECT id_pessoa, cpf, nome, whatsapp, telefone FROM 
-                       pessoas 
+                       pessoas
                    WHERE 
                        nome 
-                   LIKE '%s' ORDER BY nome ASC""" % nome, )
+                   LIKE '%{nome}%' ORDER BY cpf ASC; """)
             buscanome = self.cursor.fetchall()
 
             for i in buscanome:
@@ -402,14 +493,14 @@ class Funcao():
 
 
         elif len(whatsapp) > 0:
-            self.e_whatsapp.insert(END, "%")
+            self.e_whatsapp.insert(END, "")
             whatsapp = self.e_whatsapp.get()
-            self.cursor.execute("""
-                   SELECT id_pessoa,cpf, nome, whatsapp, telefone FROM 
-                       pessoas 
+            self.cursor.execute(f"""
+                   SELECT id_pessoa, cpf, nome, whatsapp, telefone FROM 
+                       pessoas
                    WHERE 
                        whatsapp 
-                   LIKE '%s' ORDER BY whatsapp ASC""" % whatsapp, )
+                   LIKE '%{whatsapp}%' ORDER BY cpf ASC; """)
 
             buscaWhatsapp = self.cursor.fetchall()
 
@@ -428,16 +519,16 @@ class Funcao():
         modelo = self.e_modelo.get()
         cor = self.e_cor.get()
 
-        if len(id_produto) > 0:
+        if len(id_produto) > 0 or len(produto) > 0 or len(marca) > 0 or len(modelo) > 0 or len(cor) > 0:
 
-            self.e_id_produto.insert(END, "%")
+            self.e_id_produto.insert(END, "")
             id_produto = self.e_id_produto.get()
-            self.cursor.execute("""
-                SELECT id_produto, produto, marca, modelo, cor, valor_venda FROM 
-                    produto
-                WHERE 
-                    id_produto 
-                LIKE '%s' ORDER BY id_produto ASC""" % id_produto, )
+            self.cursor.execute(f"""
+                 SELECT id_produto, produto, marca, modelo, cor, valor_venda FROM 
+                     produto
+                 WHERE 
+                     id_produto 
+                 LIKE '%{id_produto}%' ORDER BY id_produto ASC; """)
 
             buscaid_produto = self.cursor.fetchall()
 
@@ -445,14 +536,16 @@ class Funcao():
                 self.listaOrcarmentoProduto.insert("", END, values=i)
 
         elif len(produto) > 0:
-            self.e_produto.insert(END, "%")
+            self.e_produto.insert(END, "")
             produto = self.e_produto.get()
-            self.cursor.execute("""
-                SELECT id_produto, produto, marca, modelo, cor, valor_venda  FROM 
-                    produto 
-                WHERE 
-                    produto 
-                LIKE '%s' ORDER BY marca ASC""" % produto, )
+            self.cursor.execute(f"""
+                 SELECT id_produto, produto, marca, modelo, cor, valor_venda FROM 
+                     produto LIKE '%{produto}%' 
+                 AND id_produto LIKE '%{id_produto}%' 
+                 AND marca LIKE '%{marca}%'
+                 AND modelo LIKE '%{modelo}%'
+                 AND cor LIKE '%{cor}%'
+                 ORDER BY id_produto;""")
 
             buscaproduto = self.cursor.fetchall()
 
@@ -461,14 +554,14 @@ class Funcao():
 
 
         elif len(marca) > 0:
-            self.e_marca.insert(END, "%")
+            self.e_marca.insert(END, "")
             marca = self.e_marca.get()
-            self.cursor.execute("""
-                SELECT id_produto, produto, marca, modelo, cor, valor_venda  FROM 
-                    produto 
-                WHERE 
-                    marca 
-                LIKE '%s' ORDER BY marca ASC""" % marca, )
+            self.cursor.execute(f"""
+                 SELECT id_produto, produto, marca, modelo, cor, valor_venda FROM 
+                     produto
+                 WHERE 
+                     marca 
+                 LIKE '%{marca}%' ORDER BY id_produto ASC; """)
 
             buscamarca = self.cursor.fetchall()
 
@@ -476,14 +569,14 @@ class Funcao():
                 self.listaOrcarmentoProduto.insert("", END, values=i)
 
         elif len(modelo) > 0:
-            self.e_modelo.insert(END, "%")
+            self.e_modelo.insert(END, "")
             modelo = self.e_modelo.get()
-            self.cursor.execute("""
-                SELECT id_produto, produto, marca, modelo, cor, valor_venda  FROM 
-                    produto 
-                WHERE 
-                    modelo 
-                LIKE '%s' ORDER BY marca ASC""" % modelo, )
+            self.cursor.execute(f"""
+                 SELECT id_produto, produto, marca, modelo, cor, valor_venda FROM 
+                     produto
+                 modelo 
+                     id_produto 
+                 LIKE '%{modelo}%' ORDER BY id_produto ASC; """)
 
             buscamodelo = self.cursor.fetchall()
 
@@ -493,14 +586,14 @@ class Funcao():
             self.desconecta_bd()
 
         elif len(cor) > 0:
-            self.e_cor.insert(END, "%")
+            self.e_cor.insert(END, "")
             cor = self.e_cor.get()
-            self.cursor.execute("""
-                SELECT id_produto, produto, marca, modelo, cor, valor_venda FROM 
-                    produto 
-                WHERE 
-                    cor 
-                LIKE '%s' ORDER BY cor ASC""" % cor, )
+            self.cursor.execute(f"""
+                 SELECT id_produto, produto, marca, modelo, cor, valor_venda FROM 
+                     produto
+                 WHERE 
+                     cor 
+                 LIKE '%{cor}%' ORDER BY id_produto ASC; """)
 
             buscacor = self.cursor.fetchall()
 
@@ -517,124 +610,73 @@ class Funcao():
             self.conecta_bd()
             self.cursor.execute("""
                 UPDATE
-                    orcamento
+                    produto_orcado
                 SET 
-                    id_orcamento = %s, 
+                    id_orcamento = %s,
+                    id_pessoa = %s, 
                     id_produto = %s, 
                     quantidade = %s, 
                     valor_venda = %s, 
                     defeito = %s, 
                     observacao = %s,
+                    status_orcamento = %s
                 WHERE
                     cod_orcamento = %s """, (
+                    self.id_orcamento,
                     self.id_pessoa,
                     self.id_produto,
                     self.quantidade,
                     self.valor,
                     self.defeito,
                     self.observacao,
+                    self.status_orcamento,
                     self.item))
+
+        messagebox.showinfo(title="Orçamento", message="Orçamento Foi Alterado")
+
+        self.conn.commit()
+        self.desconecta_bd()
+        self.selecionaOrcamento()
 
     def buscaOrcamento(self):
         self.conecta_bd()
         self.listaOrcamento.delete(*self.listaOrcamento.get_children())
 
         id_orcamento = self.e_id_orcamento.get()
-        cpf = self.e_cpf.get()
-        nome = self.e_nome.get()
-        id_pessoa = self.e_id_pessoa.get()
-        telefone = self.e_telefone.get()
-        whatsapp = self.e_whatsapp.get()
 
         if len(id_orcamento) > 0:
-            self.e_id_orcamento.insert(END, "%")
-            id_orcamento = self.e_id_orcamento.get()
-            self.cursor.execute("""
-                   SELECT * FROM  
-                       orcamento 
-                   WHERE 
-                       id_orcamento 
-                   LIKE '%s' ORDER BY cpf ASC""" % id_orcamento, )
+            self.e_id_orcamento.insert(END, "")
+            self.cursor.execute(f"""
+                   SELECT PRODUTO_ORC.COD_ORCAMENTO,
+                        PRODUTO_ORC.ID_ORCAMENTO
+                        , PESSOA.ID_PESSOA
+                        CODIGO_PESSOA
+                        , PRODUTO.ID_PRODUTO
+                        , PRODUTO_ORC.QUANTIDADE
+                        , PRODUTO_ORC.VALOR_VENDA
+                        , PRODUTO_ORC.DEFEITO
+                        , PRODUTO_ORC.OBSERVACAO
+                        , PESSOA.NOME
+                        , PESSOA.CPF
+                        , PESSOA.TELEFONE
+                        , PESSOA.WHATSAPP
+                        , PRODUTO.PRODUTO
+                        , PRODUTO.MARCA
+                        , PRODUTO.MODELO
+                        , PRODUTO.COR
+                        , PRODUTO_ORC.STATUS_ORCAMENTO
+                        , DATE_FORMAT(data_entrada, '%d/%m/%Y') as data_entrada 
+                        , DATE_FORMAT(data_retirada, '%d/%m/%Y') as data_retirada
+                        FROM PRODUTO_ORCADO PRODUTO_ORC
+                        INNER JOIN PESSOAS PESSOA ON PESSOA.ID_PESSOA = PRODUTO_ORC.ID_PESSOA
+                        INNER JOIN PRODUTO PRODUTO ON PRODUTO.ID_PRODUTO = PRODUTO_ORC.ID_PRODUTO
+                        INNER JOIN ORCAMENTO ORC ON ORC.ID_ORCAMENTO = PRODUTO_ORC.ID_ORCAMENTO
+                        WHERE ORC.ID_ORCAMENTO = {id_orcamento}
+                   ORDER BY cpf ASC; """)
 
-            buscacpf = self.cursor.fetchall()
+            buscaOrcam = self.cursor.fetchall()
 
-            for i in buscacpf:
-                self.listaOrcamento.insert("", END, values=i)
-
-        elif len(cpf) > 0:
-            self.e_cpf.insert(END, "%")
-            cpf = self.e_cpf.get()
-            self.cursor.execute("""
-                   SELECT * FROM  
-                       orcamento 
-                   WHERE 
-                       cpf 
-                   LIKE '%s' ORDER BY cpf ASC""" % cpf, )
-
-            buscacpf = self.cursor.fetchall()
-
-            for i in buscacpf:
-                self.listaOrcamento.insert("", END, values=i)
-
-
-        elif len(nome) > 0:
-            self.e_nome.insert(END, "%")
-            nome = self.e_nome.get()
-            self.cursor.execute("""
-                   SELECT * FROM 
-                       orcamento
-                   WHERE 
-                       nome 
-                   LIKE '%s' ORDER BY nome ASC""" % nome, )
-
-            buscanome = self.cursor.fetchall()
-
-            for i in buscanome:
-                self.listaOrcamento.insert("", END, values=i)
-
-        elif len(id_pessoa) > 0:
-            self.e_id_pessoa.insert(END, "%")
-            id_pessoa = self.e_id_pessoa.get()
-            self.cursor.execute("""
-                   SELECT * FROM 
-                       orcamento 
-                   WHERE 
-                       id_pessoa 
-                   LIKE '%s' ORDER BY id_pessoa ASC""" % id_pessoa, )
-
-            buscaid_pessoas = self.cursor.fetchall()
-
-            for i in buscaid_pessoas:
-                self.listaOrcamento.insert("", END, values=i)
-
-        elif len(telefone) > 0:
-            self.e_telefone.insert(END, "%")
-            telefone = self.e_telefone.get()
-            self.cursor.execute("""
-                   SELECT * FROM 
-                       orcamento 
-                   WHERE 
-                       telefone 
-                   LIKE '%s' ORDER BY telefone ASC""" % telefone, )
-
-            buscatelefone = self.cursor.fetchall()
-
-            for i in buscatelefone:
-                self.listaOrcamento.insert("", END, values=i)
-
-        elif len(whatsapp) > 0:
-            self.e_whatsapp.insert(END, "%")
-            whatsapp = self.e_whatsapp.get()
-            self.cursor.execute("""
-                               SELECT * FROM 
-                                   orcamento 
-                               WHERE 
-                                   whatsapp
-                               LIKE '%s' ORDER BY telefone ASC""" % whatsapp, )
-
-            buscawhatsapp = self.cursor.fetchall()
-
-            for i in buscawhatsapp:
+            for i in buscaOrcam:
                 self.listaOrcamento.insert("", END, values=i)
 
     def orcar(self):
@@ -684,13 +726,24 @@ class Funcao():
         self.e_quantidadeItens.insert(0, contador)
         self.desconecta_bd()
 
+    def enviarAvisoNoWhatsapp(self):
 
-#    def enviarAvisoNoWhatsapp(self):
-#        self.conecta_bd()
-#        self.cursor.execute(f"""
-#            SELECT whatsapp FROM pessoas WHERE id_pessoa = '{self.id_pessoa}'
-        
- #       """)
+        self.conecta_bd()
+        selecionaNumeroWhatsapp = self.cursor.execute(f""" 
+            SELECT whatsapp FROM pessoas WHERE id_pessoa = '{self.e_id_pessoa.get()}'; """)
+
+        selecionaNumeroWhatsapp = self.cursor.fetchone()
+
+        self.aviso = kt.sendwhatmsg_instantly(
+            f'+55{selecionaNumeroWhatsapp}',
+            'SEGAT - Sistema Gerenciador de Assistência Técnica Avisa.'
+            'Seu Celular já está Pronto!')
+        self.conn.commit()
+        self.desconecta_bd()
+
+    def vender(self):
+        orcamento.destroy()
+        call(["python", "Tela_Venda.py"])
 
 
 class Aplicacao_Orcamento(Funcao, Relatorio):
@@ -700,6 +753,7 @@ class Aplicacao_Orcamento(Funcao, Relatorio):
         self.frames_Orcamento()
         self.labels_entry()
         self.botoes()
+        self.limpa_Tela()
         self.infoVariaveis()
         self.montaTabelaOrca()
         self.montaTabelaProdutoOrcado()
@@ -714,6 +768,7 @@ class Aplicacao_Orcamento(Funcao, Relatorio):
         self.orcamento.title("Orçamento")
         self.orcamento.config(bg=co3)
         self.orcamento.geometry("1095x700+263+0")
+        self.orcamento.iconbitmap("C:/Users/Edinho/PycharmProjects/Meu_TCC/Logo/segatIcone.ico")
 
     def frames_Orcamento(self):
         self.frameSuperior = Frame(self.orcamento, bg=co6, highlightbackground=co5, highlightthickness=6)
@@ -745,7 +800,7 @@ class Aplicacao_Orcamento(Funcao, Relatorio):
         self.e_id_pessoa = Entry(self.frameSuperior, width=45, justify='left', relief='raised', bg=co0, fg=co10)
         self.e_id_pessoa.place(x=155, y=30)
 
-        self.l_cpf = Label(self.frameSuperior, text="Cpf:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
+        self.l_cpf = Label(self.frameSuperior, text="CPF:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
         self.l_cpf.place(x=110, y=55)
         self.e_cpf = Entry(self.frameSuperior, width=45, justify='left', relief='raised', bg=co0, fg=co10)
         self.e_cpf.place(x=155, y=55)
@@ -775,9 +830,16 @@ class Aplicacao_Orcamento(Funcao, Relatorio):
         self.e_data_retirada = DateEntry(self.frameSuperior, width=42, justify='left', relief='raised', locale="pt_br")
         self.e_data_retirada.place(x=155, y=180)
 
+        self.l_status_orcamento = Label(self.frameSuperior, text="Status:", font=("Courier", 13, "italic", "bold"),
+                                        bg=co6, fg=co10)
+        self.l_status_orcamento.place(x=80, y=205)
+        self.c_status_orcamento = Combobox(self.frameSuperior, width=42)
+        self.c_status_orcamento["values"] = ("Orçamento", "Aprovado", "Retirado")
+        self.c_status_orcamento.set("")
+        self.c_status_orcamento.place(x=155, y=205)
+
         # - - - - - - - Produtos - - - - - -
-        self.l_item = Label(self.frameSuperior, text="Item:", font=("Courier", 13, "italic", "bold"), bg=co6,
-                            fg=co10)
+        self.l_item = Label(self.frameSuperior, text="Item:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
         self.l_item.place(x=645, y=5)
         self.e_item = Entry(self.frameSuperior, width=45, justify='left', relief='raised', bg=co0, fg=co10)
         self.e_item.place(x=700, y=5)
@@ -885,15 +947,12 @@ class Aplicacao_Orcamento(Funcao, Relatorio):
                                 font=("Courier", 13, "italic", "bold"), bg=co8, fg=co10, relief=RAISED, overrelief=RIDGE)
         self.b_alterar.place(x=850, y=255, height=40, width=100)
 
-        self.b_avisoWhatsapp = Button(self.frameSuperior, text="Avisar", command=self.alteraOrcamento,
+        self.b_avisoWhatsapp = Button(self.frameSuperior, text="Avisar", command=self.enviarAvisoNoWhatsapp,
                                       font=("Courier", 13, "italic", "bold"), bg=co8, fg=co10, relief=RAISED, overrelief=RIDGE)
         self.b_avisoWhatsapp.place(x=960, y=255, height=40, width=100)
 
 # - - - - - - - Botão Frame Inferior - - - - - - -
-
-
-
-        self.b_vender = Button(self.frameInferior, text="Vender", command=self.adicionaProdutoOrcado,
+        self.b_vender = Button(self.frameInferior, text="Vender", command=self.vender,
                               font=("Courier", 13, "italic", "bold"), bg=co7, fg=co10, relief=RAISED, overrelief=RIDGE)
         self.b_vender.place(x=960, y=10, height=40, width=100)
 

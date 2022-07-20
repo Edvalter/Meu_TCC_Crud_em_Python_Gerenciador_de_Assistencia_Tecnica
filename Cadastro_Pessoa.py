@@ -8,19 +8,12 @@ from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
 from tkinter.ttk import Combobox
-
 from view import *
 import view
-
 from datetime import datetime as dt
 import mysql.connector
 from tkcalendar import Calendar, DateEntry
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter, A4
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.platypus import SimpleDocTemplate, Image
-import webbrowser
+
 
 database = "gerenciador.db"
 
@@ -40,45 +33,11 @@ co9 = "orange"  # em uso = laranja botão excluir
 co6 = "#A8A8A8"  # em uso = cinza  fundo dos labels e do frame
 co10 = "Black" # em uso = cor da fonte
 
-LETRAS = font=('Ivy 10 bold')
 
 # - - janela Cadastro de Pessoas - -
 
 cadpessoas = Tk()
 
-
-class Relatorio():
-    def imprimir(self):
-        webbrowser.open("cliente.pdf")
-    def geraRelatorio(self):
-        self.c = canvas.Canvas("cliente.pdf")
-
-        self.idPessoaRelatorio = self.e_id_pessoa.get()
-        self.nomeRelatorio = self.e_nome.get()
-        self.whatsappRelatorio = self.e_whatsapp.get()
-        self.data_cadastroRelatorio = self.e_data_cadastro.get()
-
-        self.c.setFont("Helvetica-Bold", 18)
-        self.c.drawString(200, 790, 'Ficha do Cliente')
-
-        self.c.setFont("Helvetica-Bold", 12)
-        self.c.drawString(50, 700, 'Código: ')  # + self.codigoRel) se eu quiser fazer a concatenação é so colocar essa parte
-        self.c.drawString(50, 680, 'Nome: ')
-        self.c.drawString(50, 660, 'Telefone: ')
-        self.c.drawString(50, 640, 'Data do Cadastro: ')
-
-        self.c.setFont("Helvetica", 12)
-
-        self.c.drawString(110, 700, self.idPessoaRelatorio)
-        self.c.drawString(90, 680, self.nomeRelatorio)
-        self.c.drawString(110, 660, self.whatsappRelatorio)
-        self.c.drawString(160, 640, self.data_cadastroRelatorio)
-
-        self.c.rect(20, 550, 550, 5, fill=True, stroke=False)  # cria o retangulo no final da folha
-
-        self.c.showPage()
-        self.c.save()
-        self.imprimir()
 
 class Funcao_Pessoas():
     def limpa_Tela_Pessoas(self):
@@ -158,7 +117,8 @@ class Funcao_Pessoas():
     def adiciona_Pessoa(self):
         self.pessoas_Variaveis()
         if self.e_cpf.get() == "" or self.e_nome.get() == "":
-            messagebox.showerror(title="Cadastro de Pessoas", message="Campo CPF ou Nome estão vazios")
+            messagebox.showerror(title="Cadastro de Pessoas", message="Algumas Informações Não Foram Inseridas")
+            pass
         else:
             self.conecta_bd()
             self.cursor.execute("""
@@ -299,9 +259,9 @@ class Funcao_Pessoas():
 
             messagebox.showinfo(title="Cadastro de Pessoas", message="Cadastro Alterado com Sucesso")
 
-            self.conn.commit()
-            self.desconecta_bd()
-            self.select_Pessoa()
+        self.conn.commit()
+        self.desconecta_bd()
+        self.select_Pessoa()
 
     def buscar_Pessoa(self):
         self.conecta_bd()
@@ -315,100 +275,104 @@ class Funcao_Pessoas():
         email = self.e_email.get()
 
         if len(cpf) > 0:
-            self.e_cpf.insert(END, "%")
+            self.e_cpf.insert(END, "")
             cpf = self.e_cpf.get()
-            self.cursor.execute("""
-                SELECT * FROM  
-                    pessoas 
-                WHERE 
-                    cpf 
-                LIKE '%s' ORDER BY cpf ASC""" % cpf,)
+            self.cursor.execute(f"""
+                   SELECT * FROM  
+                       pessoas 
+                   WHERE 
+                       cpf 
+                   LIKE '%{cpf}%' ORDER BY id_pessoa ASC; """)
 
             buscacpf = self.cursor.fetchall()
 
             for i in buscacpf:
-                self.listapessoas.insert("", END, values=i)
+                posicaoDaData = i[0:14] + (i[14].strftime('%d/%m/%Y'),)
+                self.listapessoas.insert("", END, values=posicaoDaData)
 
         elif len(nome) > 0:
-            self.e_nome.insert(END, "%")
+            self.e_nome.insert(END, "")
             nome = self.e_nome.get()
-            self.cursor.execute("""
-                SELECT * FROM 
-                    pessoas
-                WHERE 
-                    nome 
-                LIKE '%s' ORDER BY nome ASC""" % nome,)
+            self.cursor.execute(f"""
+                   SELECT * FROM  
+                       pessoas 
+                   WHERE 
+                       nome 
+                   LIKE '%{nome}%' ORDER BY id_pessoa ASC; """)
 
             buscanome = self.cursor.fetchall()
 
             for i in buscanome:
-                self.listapessoas.insert("", END, values=i)
+                posicaoDaData = i[0:14] + (i[14].strftime('%d/%m/%Y'),)
+                self.listapessoas.insert("", END, values=posicaoDaData)
 
         elif len(id_pessoa) > 0:
-            self.e_id_pessoa.insert(END, "%")
+            self.e_id_pessoa.insert(END, "")
             id_pessoa = self.e_id_pessoa.get()
-            self.cursor.execute("""
-                SELECT * FROM 
-                    pessoas 
-                WHERE 
-                    id_pessoa 
-                LIKE '%s' ORDER BY id_pessoa ASC""" % id_pessoa,)
+            self.cursor.execute(f"""
+                   SELECT * FROM  
+                       pessoas 
+                   WHERE 
+                       id_pessoa 
+                   LIKE '%{id_pessoa}%' ORDER BY id_pessoa ASC; """)
 
             buscaid_pessoas = self.cursor.fetchall()
 
             for i in buscaid_pessoas:
-                self.listapessoas.insert("", END, values=i)
+                posicaoDaData = i[0:14] + (i[14].strftime('%d/%m/%Y'),)
+                self.listapessoas.insert("", END, values=posicaoDaData)
 
         elif len(telefone) > 0:
-            self.e_telefone.insert(END, "%")
+            self.e_telefone.insert(END, "")
             telefone = self.e_telefone.get()
-            self.cursor.execute("""
-                SELECT * FROM 
-                    pessoas 
-                WHERE 
-                    telefone 
-                LIKE '%s' ORDER BY telefone ASC""" % telefone,)
+            self.cursor.execute(f"""
+                   SELECT * FROM  
+                       pessoas 
+                   WHERE 
+                       telefone 
+                   LIKE '%{telefone}%' ORDER BY id_pessoa ASC; """)
 
             buscatelefone = self.cursor.fetchall()
 
             for i in buscatelefone:
-                self.listapessoas.insert("", END, values=i)
+                posicaoDaData = i[0:14] + (i[14].strftime('%d/%m/%Y'),)
+                self.listapessoas.insert("", END, values=posicaoDaData)
 
         elif len(whatsapp) > 0:
-            self.e_whatsapp.insert(END, "%")
+            self.e_whatsapp.insert(END, "")
             whatsapp = self.e_whatsapp.get()
-            self.cursor.execute("""
-                SELECT * FROM 
-                    pessoas 
-                WHERE 
-                    whatsapp 
-                LIKE '%s' ORDER BY whatsapp ASC""" % whatsapp,)
+            self.cursor.execute(f"""
+                   SELECT * FROM  
+                       pessoas 
+                   WHERE 
+                       whatsapp 
+                   LIKE '%{whatsapp}%' ORDER BY id_pessoa ASC; """)
 
             buscawhatsapp = self.cursor.fetchall()
 
             for i in buscawhatsapp:
-                self.listapessoas.insert("", END, values=i)
+                posicaoDaData = i[0:14] + (i[14].strftime('%d/%m/%Y'),)
+                self.listapessoas.insert("", END, values=posicaoDaData)
 
         elif len(email) > 0:
-            self.e_email.insert(END, "%")
+            self.e_email.insert(END, "")
             email = self.e_email.get()
-            self.cursor.execute("""
-                SELECT * FROM 
-                    pessoas 
-                WHERE 
-                    email 
-                LIKE '%s' ORDER BY email ASC""" % email, )
+            self.cursor.execute(f"""
+                   SELECT * FROM  
+                       pessoas 
+                   WHERE 
+                       email 
+                   LIKE '%{email}%' ORDER BY id_pessoa ASC; """)
             buscaemail = self.cursor.fetchall()
 
             for i in buscaemail:
-                self.listapessoas.insert("", END, values=i)
+                posicaoDaData = i[0:14] + (i[14].strftime('%d/%m/%Y'),)
+                self.listapessoas.insert("", END, values=posicaoDaData)
 
-
-
-        self.limpa_Tela_Pessoas()
         self.desconecta_bd()
 
-class Aplicacao_Pessoas(Funcao_Pessoas, Relatorio):
+
+class Aplicacao_Pessoas(Funcao_Pessoas):
     def __init__(self):
         self.cadpessoas = cadpessoas
         self.tela_cadastro_Pessoas()
@@ -425,6 +389,7 @@ class Aplicacao_Pessoas(Funcao_Pessoas, Relatorio):
         self.cadpessoas.title("Cadastro de Pessoas")
         self.cadpessoas.config(bg="#1e3743")
         self.cadpessoas.geometry("1095x700+263+0")
+        self.cadpessoas.iconbitmap("C:/Users/Edinho/PycharmProjects/Meu_TCC/Logo/segatIcone.ico")
 
     def frames_cad_pessoas(self):
         self.frame_superior_pessoas = Frame(self.cadpessoas, bd=4, bg=co6, highlightbackground=co5, highlightthickness=6)
@@ -507,16 +472,11 @@ class Aplicacao_Pessoas(Funcao_Pessoas, Relatorio):
         self.l_status_pessoa = Label(self.frame_superior_pessoas, text="Status:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
         self.l_status_pessoa.place(x=70, y=185)
         self.c_status_pessoa = Combobox(self.frame_superior_pessoas, width=42)
-        self.c_status_pessoa["values"] = ("Cliente", "Funcionário")
+        self.c_status_pessoa["values"] = ("Cliente", "Usuário", "Administrador")
         self.c_status_pessoa.set("Cliente")
         self.c_status_pessoa.place(x=150, y=185)
 
-
     def botoes_tela_pessoas(self):
-        self.b_imprimir = Button(self.frame_superior_pessoas, text="Imprimir", command=self.geraRelatorio,
-                                 font=("Courier", 13, "italic", "bold"), bg=co1, fg=co2, relief=RAISED, overrelief=RIDGE)
-        self.b_imprimir.place(x=270, y=225, height=40, width=100)
-
         self.b_limpar = Button(self.frame_superior_pessoas, text="Limpar", command=self.limpa_Tela_Pessoas, width=10,font=("Courier", 13, "italic", "bold"), bg=co1, fg=co2, relief=RAISED, overrelief=RIDGE)
         self.b_limpar.place(x=380, y=225, height=40, width=100)
 
@@ -556,27 +516,27 @@ class Aplicacao_Pessoas(Funcao_Pessoas, Relatorio):
         self.listapessoas.column("#0", anchor='center', width=1)
         self.listapessoas.column("#1", anchor='center', width=45)
         self.listapessoas.column("#2", anchor='center', width=70)
-        self.listapessoas.column("#3", anchor='center',  width=65)
-        self.listapessoas.column("#4", anchor='center',  width=65)
-        self.listapessoas.column("#5", anchor='center', width=65)
-        self.listapessoas.column("#6", anchor='center', width=65)
-        self.listapessoas.column("#7", anchor='center',  width=65)
-        self.listapessoas.column("#8", anchor='center',  width=65)
-        self.listapessoas.column("#9", anchor='center',  width=65)
-        self.listapessoas.column("#10", anchor='center',  width=65)
-        self.listapessoas.column("#11", anchor='center',  width=65)
+        self.listapessoas.column("#3", anchor='center',  width=90)
+        self.listapessoas.column("#4", anchor='center',  width=90)
+        self.listapessoas.column("#5", anchor='center', width=90)
+        self.listapessoas.column("#6", anchor='center', width=120)
+        self.listapessoas.column("#7", anchor='center',  width=80)
+        self.listapessoas.column("#8", anchor='center',  width=100)
+        self.listapessoas.column("#9", anchor='center',  width=50)
+        self.listapessoas.column("#10", anchor='center',  width=70)
+        self.listapessoas.column("#11", anchor='center',  width=70)
         self.listapessoas.column("#12", anchor='center',  width=65)
         self.listapessoas.column("#13", anchor='center',  width=65)
-        self.listapessoas.column("#14", anchor='center', width=65)
-        self.listapessoas.column("#15", anchor='center', width=65)
+        self.listapessoas.column("#14", anchor='center', width=80)
+        self.listapessoas.column("#15", anchor='center', width=100)
 
-        self.listapessoas.place(x=0, y=0, height=325, width=1050)
+        self.listapessoas.place(x=0, y=1, height=325, width=1050)
 
         self.barra_vertical = ttk.Scrollbar(self.frame_grid_pessoas, orient='vertical', command=self.listapessoas.yview)
-        self.barra_vertical.place(x=1048, y=0, height=328, width=15)
+        self.barra_vertical.place(x=1048, y=0, height=342, width=15)
 
         self.barra_horizontal = ttk.Scrollbar(self.frame_grid_pessoas, orient='horizontal', command=self.listapessoas.xview)
-        self.barra_horizontal.place(x=0, y=313, height=15, width=1050)
+        self.barra_horizontal.place(x=0, y=328, height=15, width=1045)
 
         self.listapessoas.configure(yscrollcommand=self.barra_vertical.set, xscrollcommand=self.barra_horizontal.set)
 

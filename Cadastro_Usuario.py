@@ -107,7 +107,7 @@ class Funcao():
         self.listaPessoas.delete(*self.listaPessoas.get_children())
         self.conecta_bd()
         listaPe = self.cursor.execute("""
-            SELECT id_pessoa, nome FROM pessoas where status_pessoa = 'Funcionário' ORDER BY id_pessoa ASC; """)
+            SELECT id_pessoa, nome FROM pessoas WHERE status_pessoa <> 'Cliente' ORDER BY id_pessoa ASC; """)
 
         listaPe = self.cursor.fetchall()
 
@@ -120,7 +120,6 @@ class Funcao():
         self.listaFuncionario.delete(*self.listaFuncionario.get_children())
         self.conecta_bd()
         listaFun = self.cursor.execute(""" SELECT * FROM funcionario; """)
-
         listaFun = self.cursor.fetchall()
 
         for i in listaFun:
@@ -157,8 +156,8 @@ class Funcao():
     def deletaFuncionario(self):
         self.funcionarioVariaveis()
         self.conecta_bd()
-        self.cursor.execute("""
-               DELETE FROM funcionario WHERE id_funcionario= %s """, (self.id_funcionario,))
+        self.cursor.execute(f"""
+               DELETE FROM funcionario WHERE id_funcionario= '%{self.id_funcionario}%'; """)
         messagebox.showinfo(title="Cadastro de Funcionários", message="Usuário excluído com Sucesso")
 
         self.conn.commit()
@@ -210,16 +209,15 @@ class Funcao():
         nome = self.e_nome.get()
 
         if len(id_pessoa) > 0:
-            self.e_id_pessoa.insert(END, "%")
+            self.e_id_pessoa.insert(END, "")
             id_pessoa = self.e_id_pessoa.get()
-            self.cursor.execute("""
-                SELECT 
-                    id_pessoa, nome 
+            self.cursor.execute(f"""
+                SELECT id_pessoa, nome 
                 FROM 
                     pessoas 
                 WHERE 
                     id_pessoa 
-                LIKE '%s' ORDER BY id_pessoa ASC""" % id_pessoa, )
+                LIKE '%{id_pessoa}' ORDER BY id_pessoa ASC; """)
 
             buscaIdPessoa = self.cursor.fetchall()
 
@@ -227,16 +225,16 @@ class Funcao():
                 self.listaPessoas.insert("", END, values=i)
 
         elif len(nome) > 0:
-            self.e_nome.insert(END, "%")
+            self.e_nome.insert(END, "")
             nome = self.e_nome.get()
-            self.cursor.execute("""
+            self.cursor.execute(f"""
                 SELECT 
                     id_pessoa, nome  
                 FROM 
                     pessoas 
                 WHERE 
                     nome 
-                LIKE '%s' ORDER BY nome ASC""" % nome, )
+                LIKE '%{nome}' ORDER BY nome ASC; """)
 
             buscaNome = self.cursor.fetchall()
 
@@ -252,14 +250,14 @@ class Funcao():
         nome = self.e_nome.get()
 
         if len(id_funcionario) > 0:
-            self.e_id_funcionario.insert(END, "%")
+            self.e_id_funcionario.insert(END, "")
             id_pessoa = self.e_id_funcionario.get()
-            self.cursor.execute("""
+            self.cursor.execute(f"""
                 SELECT * FROM 
                     funcionario 
                 WHERE 
                     id_funcionario 
-                LIKE '%s' ORDER BY id_funcionario ASC""" % id_funcionario, )
+                LIKE '%{id_funcionario}' ORDER BY id_funcionario ASC; """)
 
             buscaIdFuncionario = self.cursor.fetchall()
 
@@ -268,14 +266,14 @@ class Funcao():
 
 
         elif len(id_pessoa) > 0:
-            self.e_id_pessoa.insert(END, "%")
+            self.e_id_pessoa.insert(END, "")
             id_pessoa = self.e_id_pessoa.get()
-            self.cursor.execute("""
+            self.cursor.execute(f"""
                 SELECT * FROM 
                     funcionario 
                 WHERE 
                     id_pessoa
-                LIKE '%s' ORDER BY nome ASC""" % id_pessoa, )
+                LIKE '%{id_pessoa}%' ORDER BY nome ASC; """)
 
             buscaIdPessoa = self.cursor.fetchall()
 
@@ -283,14 +281,14 @@ class Funcao():
                 self.listaFuncionario.insert("", END, values=i)
 
         elif len(nome) > 0:
-            self.e_nome.insert(END, "%")
+            self.e_nome.insert(END, "")
             nome = self.e_nome.get()
-            self.cursor.execute("""
+            self.cursor.execute(f"""
                 SELECT * FROM 
                     funcionario 
                 WHERE 
                     nome 
-                LIKE '%s' ORDER BY nome ASC""" % nome, )
+                LIKE '%{nome}%' ORDER BY nome ASC; """)
 
             buscaNome = self.cursor.fetchall()
 
@@ -317,6 +315,7 @@ class AplicacaoUsuarios(Funcao):
         self.cad_funcionario.title("Cadastro de Funcionários")
         self.cad_funcionario.config(bg=co3)
         self.cad_funcionario.geometry("1095x700+263+0")
+        self.cad_funcionario.iconbitmap("C:/Users/Edinho/PycharmProjects/Meu_TCC/Logo/segatIcone.ico")
 
     def frame_Cad_Funcionarios(self):
         self.frameSuperior = Frame(self.cad_funcionario, height=280, width=1365, bd=4, bg=co6, highlightbackground=co5, highlightthickness=6)
@@ -352,7 +351,7 @@ class AplicacaoUsuarios(Funcao):
         self.e_login = Entry(self.frameSuperior, width=45, justify='left', relief='raised', bg=co0, fg=co10)
         self.e_login.place(x=190, y=85)
 
-        self.l_senha = Label(self.frameSuperior, text="Senha:", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
+        self.l_senha = Label(self.frameSuperior, text="Senha:",font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
         self.l_senha.place(x=125, y=110)
         self.e_senha = Entry(self.frameSuperior, width=45, show="*", justify='left', relief='raised', bg=co0, fg=co10)
         self.e_senha.place(x=190, y=110)

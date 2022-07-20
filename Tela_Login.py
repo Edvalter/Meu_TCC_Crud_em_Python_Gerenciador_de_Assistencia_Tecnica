@@ -10,7 +10,7 @@ from view import *
 import view
 import mysql.connector
 from tkcalendar import Calendar, DateEntry
-
+import win32
 
 
 try:
@@ -25,19 +25,21 @@ except ImportError:
     import tkinter.ttk as ttk
     py3 = True
 
-co0 = "#f0f3f5"  # Preta
+
+co0 = "#f0f3f5"  # white
 co1 = "#f0f3f5"  # cizenta / grey
 co2 = "#403d3d"  # letra
 co3 = "#333333"  # azul escuro / fundo da tela / fundo dos label
 co4 = "#666666"  # roxo claro / fundo do frame
 co5 = "#759fe6"  # cor da borda - highlightbackground
-co6 = "#A8A8A8"  # cinza
+co6 = "#A8A8A8"  # em uso = cinza  fundo dos labels e do frame
 co7 = "#6aabb5"  # Botão Adicionar
-co8 =  "#ffff99"  # Botão Alterar
-co9 =  "#d54c4a"  # botão excluir
-co10 = "white"
-
+co8 = "#ffff99"  # Botão Alterar
+co9 = "orange"  # em uso = laranja botão excluir
+co10 = "Black" # em uso = cor da fonte
 TelaDeLogin = Tk()
+
+logo = PhotoImage(file="C:/Users/Edinho/PycharmProjects/Meu_TCC/Logo/Segat_Logo.png")
 
 class Login():
 # - - Limpar a Tela - - - - - - - - - - - - - - - -
@@ -103,26 +105,30 @@ class Aplicacao_Login(Login):
 
 # - - Configurando as posições/medidas da tela de login - - - - - - - - -
     def tela_login(self):
-        self.TelaDeLogin.title("SegaT")
-        self.TelaDeLogin.config(bg=co3)
-        self.TelaDeLogin.geometry("300x250+550+250")
+        self.TelaDeLogin.title("")
+        self.TelaDeLogin.config(bg=co6)
+        self.TelaDeLogin.geometry("242x300+550+200")
         self.TelaDeLogin.resizable(width=False, height=False)
+        self.TelaDeLogin.iconbitmap("C:/Users/Edinho/PycharmProjects/Meu_TCC/Logo/segatIcone.ico")
 
-# - - Posição dos Label's e Entry's - - - - - - - - - - - - - - - - - -
+    # - - Posição dos Label's e Entry's - - - - - - - - - - - - - - - - - -
     def labels_login(self):
-        self.l_login = Label(self.TelaDeLogin, text="Login", font=("Courier", 13, "italic", "bold"), bg=co3, fg=co10)
-        self.l_login.place(x=110, y=15)
-        self.e_login = Entry(self.TelaDeLogin, justify='center', relief='raised', bg=co2, fg=co10)
-        self.e_login.place(x=100, y=40, width=100)
+        self.l_login = Label(self.TelaDeLogin, text="Login", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
+        self.l_login.place(x=90, y=140)
+        self.e_login = Entry(self.TelaDeLogin, justify='center', relief='raised', bg=co0, fg=co10)
+        self.e_login.place(x=70, y=125, width=100)
 
-        self.l_senha = Label(self.TelaDeLogin, text="Senha", font=("Courier", 13, "italic", "bold"), bg=co3, fg=co10)
-        self.l_senha.place(x=110, y=65)
-        self.e_senha = Entry(self.TelaDeLogin, show="*", justify='center', relief='raised', bg=co2, fg=co10)
-        self.e_senha.place(x=100, y=90, width=100)
+        self.l_senha = Label(self.TelaDeLogin, text="Senha", font=("Courier", 13, "italic", "bold"), bg=co6, fg=co10)
+        self.l_senha.place(x=90, y=195)
+        self.e_senha = Entry(self.TelaDeLogin, show="*", justify='center', relief='raised', bg=co0, fg=co10)
+        self.e_senha.place(x=70, y=180, width=100)
+
+        logoLabel = Label(self.TelaDeLogin, image=logo, bg=co6)
+        logoLabel.place(x=15, y=0)
 
 # - - Botão Entrar - - - - - - - - - - - - - - - - - - - - - - - - - -
     def botao(self):
-        self.b_entrar = Button(self.TelaDeLogin, text="Entrar", command=self.entra, font=("Courier", 13, "italic", "bold"), bg=co3, fg=co10)
-        self.b_entrar.place(x=100, y=150, width=100)
+        self.b_entrar = Button(self.TelaDeLogin, text="Entrar", command=self.entra, font=("Courier", 13, "italic", "bold"), bg=co1, fg=co10)
+        self.b_entrar.place(x=70, y=250, width=100)
 
 Aplicacao_Login()

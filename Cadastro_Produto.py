@@ -22,12 +22,10 @@ co2 = "#403d3d"  # letra
 co3 = "#333333"  # azul escuro / fundo da tela / fundo dos label
 co4 = "#666666"  # roxo claro / fundo do frame
 co5 = "#759fe6"  # cor da borda - highlightbackground
+co6 = "#A8A8A8"  # em uso = cinza  fundo dos labels e do frame
 co7 = "#6aabb5"  # Botão Adicionar
 co8 = "#ffff99"  # Botão Alterar
-
-
 co9 = "orange"  # em uso = laranja botão excluir
-co6 = "#A8A8A8"  # em uso = cinza  fundo dos labels e do frame
 co10 = "Black" # em uso = cor da fonte
 co11 = "white" # em uso no fundo do grid
 
@@ -57,7 +55,7 @@ class Funcao():
     def montatabelas(self):
         self.conecta_bd()
         self.cursor.execute("""
-                CREATE TABLE IF NOT EXISTS produto(
+            CREATE TABLE IF NOT EXISTS produto(
                 id_produto INTEGER AUTO_INCREMENT,
                 produto VARCHAR(100) NOT NULL,
                 marca VARCHAR(100) NOT NULL,
@@ -66,7 +64,7 @@ class Funcao():
                 valor_compra FLOAT,
                 valor_venda FLOAT,
                 estoque INTEGER,
-                PRIMARY KEY (id_produto)
+            PRIMARY KEY (id_produto)
             );
         """)
 
@@ -198,20 +196,19 @@ class Funcao():
         marca = self.e_marca.get()
         modelo = self.e_modelo.get()
         cor = self.e_cor.get()
-        if len(produto) > 0 or len(marca) > 0 or len(modelo) > 0 or len(cor) > 0:
+        estoque = self.e_estoque.get()
+
+        if len(produto) > 0 or len(marca) > 0 or len(modelo) > 0 or len(cor) > 0 or len(estoque) > 0:
             self.e_produto.insert(END, "")
             self.cursor.execute(f"""
                 SELECT * FROM 
                     produto
                 WHERE 
-                    produto 
-                LIKE '%{produto}%' 
-                and marca 
-                LIKE '%{marca}%'
-                and modelo 
-                LIKE '%{modelo}%'
-                and cor 
-                LIKE '%{cor}%'
+                    produto LIKE '%{produto}%' 
+                AND marca LIKE '%{marca}%'
+                AND modelo LIKE '%{modelo}%'
+                AND cor LIKE '%{cor}%'
+                AND estoque LIKE '{estoque}%'
                 ORDER BY id_produto;""")
 
             buscaproduto = self.cursor.fetchall()
@@ -237,6 +234,7 @@ class Aplicacao_Produto(Funcao):
         self.cad_produto.title("Cadastro de Produto")
         self.cad_produto.config(bg=co3)
         self.cad_produto.geometry("1095x700+263+0")
+        self.cad_produto.iconbitmap("C:/Users/Edinho/PycharmProjects/Meu_TCC/Logo/segatIcone.ico")
 
     def frames_cad_produto(self):
         self.frame_superior = Frame(self.cad_produto, bd=4, bg=co6, highlightbackground=co5, highlightthickness=6)
