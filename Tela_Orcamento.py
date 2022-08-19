@@ -26,10 +26,12 @@ co2 = "#403d3d"  # letra
 co3 = "#333333"  # azul escuro / fundo da tela / fundo dos label
 co4 = "#666666"  # roxo claro / fundo do frame
 co5 = "#759fe6"  # cor da borda - highlightbackground
-co6 = "#A8A8A8"  # em uso = cinza  fundo dos labels e do frame
 co7 = "#6aabb5"  # Botão Adicionar
 co8 = "#ffff99"  # Botão Alterar
+
+
 co9 = "orange"  # em uso = laranja botão excluir
+co6 = "#A8A8A8"  # em uso = cinza  fundo dos labels e do frame
 co10 = "Black" # em uso = cor da fonte
 co11 = "white" # em uso no fundo do grid
 
@@ -202,19 +204,19 @@ class Funcao():
     def montaTabelaProdutoOrcado(self):
         self.conecta_bd()
         self.cursor.execute("""
-                CREATE TABLE IF NOT EXISTS produto_orcado(
-                    cod_orcamento INT AUTO_INCREMENT PRIMARY KEY, 
-                    id_orcamento INT,
-                    id_pessoa INT, 	
-                    id_produto INT, 
-                    quantidade INT,
-                    valor_venda FLOAT,
-                    defeito VARCHAR(100),
-                    observacao VARCHAR(100),
-                    status_orcamento VARCHAR(20),
-                FOREIGN KEY (id_orcamento) REFERENCES orcamento (id_orcamento),
-                FOREIGN KEY (id_pessoa) REFERENCES pessoas (id_pessoa),
-                FOREIGN KEY (id_produto) REFERENCES produto (id_produto)); """)
+            CREATE TABLE IF NOT EXISTS produto_orcado(
+                cod_orcamento INT AUTO_INCREMENT PRIMARY KEY, 
+                id_orcamento INT,
+                id_pessoa INT, 	
+                id_produto INT, 
+                quantidade INT,
+                valor_venda FLOAT,
+                defeito VARCHAR(100),
+                observacao VARCHAR(100),
+                status_orcamento VARCHAR(20),
+            FOREIGN KEY (id_orcamento) REFERENCES orcamento (id_orcamento),
+            FOREIGN KEY (id_pessoa) REFERENCES pessoas (id_pessoa),
+            FOREIGN KEY (id_produto) REFERENCES produto (id_produto));""")
 
         self.conn.commit()
         self.desconecta_bd()
@@ -267,18 +269,18 @@ class Funcao():
             pass
 
         else:
-            self.cursor.execute("""
+            self.cursor.execute(f"""
                 INSERT INTO 
                     orcamento(
                         id_orcamento,
                         id_pessoa,
                         data_entrada, 
                         data_retirada) 
-                    VALUES (%s, %s, %s, %s)""", (
-                        self.id_orcamento,
-                        self.id_pessoa,
-                        self.dataEntradaConvertida,
-                        self.dataRetiradaConvertida))
+                    VALUES (
+                        '{self.id_orcamento}',
+                        '{self.id_pessoa}',
+                        '{self.dataEntradaConvertida}',
+                        '{self.dataRetiradaConvertida}'); """)
 
             messagebox.showinfo(title="Orçamento", message="Orçamento Gravado")
 
@@ -294,7 +296,7 @@ class Funcao():
 
         else:
             self.conecta_bd()
-            self.cursor.execute("""
+            self.cursor.execute(f"""
                 INSERT INTO 
                     produto_orcado(
                         id_orcamento,
@@ -305,16 +307,15 @@ class Funcao():
                         defeito, 
                         observacao,
                         status_orcamento)
-                 VALUES 
-                        (%s, %s, %s, %s, %s, %s, %s, %s) """, (
-                        self.id_orcamento,
-                        self.id_pessoa,
-                        self.id_produto,
-                        self.quantidade,
-                        self.valor,
-                        self.defeito,
-                        self.observacao,
-                        self.status_orcamento))
+                 VALUES (
+                        '{self.id_orcamento}',
+                        '{self.id_pessoa}',
+                        '{self.id_produto}',
+                        '{self.quantidade}',
+                        '{self.valor}',
+                        '{self.defeito}',
+                        '{self.observacao}',
+                        '{self.status_orcamento}'); """)
 
             messagebox.showinfo(title="Cadastro de Pessoas", message="Cadastro realizado com sucesso")
 
@@ -353,7 +354,6 @@ class Funcao():
         lista = self.cursor.execute(f"""
             SELECT * FROM produto_orcado WHERE 
                 id_orcamento = '{self.e_id_orcamento.get()}' AND id_pessoa = '{self.e_id_pessoa.get()}'; """)
-
         lista = self.cursor.fetchall()
         for i in lista:
             self.listaOrcamento.insert("", END, values=i)
@@ -405,8 +405,7 @@ class Funcao():
         self.listaOrcamento.selection()
 
         for n in self.listaOrcamento.selection():
-            col1, col2, col3, col4, col5, col6, col7, col8, col9, col10, col11, \
-            col12, col13, col14, col15, col16, col17, col18, col19 = self.listaOrcamento.item(n, 'values')
+            col1, col2, col3, col4, col5, col6, col7, col8, col9, col10, col11, col12, col13, col14, col15, col16, col17, col18, col19 = self.listaOrcamento.item(n, 'values')
 
             self.e_item.delete(0, END)
             self.e_id_orcamento.delete(0, END)
@@ -513,6 +512,8 @@ class Funcao():
         self.conecta_bd()
         self.listaOrcarmentoProduto.delete(*self.listaOrcarmentoProduto.get_children())
 
+# vefigicar essa função, pois eu fiz pra buscar tudo de uma só vez mas ainda exixtem os outros campos
+
         id_produto = self.e_id_produto.get()
         produto = self.e_produto.get()
         marca = self.e_marca.get()
@@ -522,83 +523,22 @@ class Funcao():
         if len(id_produto) > 0 or len(produto) > 0 or len(marca) > 0 or len(modelo) > 0 or len(cor) > 0:
 
             self.e_id_produto.insert(END, "")
-            id_produto = self.e_id_produto.get()
             self.cursor.execute(f"""
                  SELECT id_produto, produto, marca, modelo, cor, valor_venda FROM 
                      produto
                  WHERE 
-                     id_produto 
-                 LIKE '%{id_produto}%' ORDER BY id_produto ASC; """)
+                     id_produto LIKE '%{id_produto}%'
+                 AND produto LIKE '%{produto}%'
+                 AND marca LIKE '%{marca}%'
+                 AND modelo LIKE '%{modelo}%'
+                 AND cor LIKE '%{cor}%'                  
+                 ORDER BY id_produto ASC; """)
 
             buscaid_produto = self.cursor.fetchall()
 
             for i in buscaid_produto:
                 self.listaOrcarmentoProduto.insert("", END, values=i)
 
-        elif len(produto) > 0:
-            self.e_produto.insert(END, "")
-            produto = self.e_produto.get()
-            self.cursor.execute(f"""
-                 SELECT id_produto, produto, marca, modelo, cor, valor_venda FROM 
-                     produto LIKE '%{produto}%' 
-                 AND id_produto LIKE '%{id_produto}%' 
-                 AND marca LIKE '%{marca}%'
-                 AND modelo LIKE '%{modelo}%'
-                 AND cor LIKE '%{cor}%'
-                 ORDER BY id_produto;""")
-
-            buscaproduto = self.cursor.fetchall()
-
-            for i in buscaproduto:
-                self.listaOrcarmentoProduto.insert("", END, values=i)
-
-
-        elif len(marca) > 0:
-            self.e_marca.insert(END, "")
-            marca = self.e_marca.get()
-            self.cursor.execute(f"""
-                 SELECT id_produto, produto, marca, modelo, cor, valor_venda FROM 
-                     produto
-                 WHERE 
-                     marca 
-                 LIKE '%{marca}%' ORDER BY id_produto ASC; """)
-
-            buscamarca = self.cursor.fetchall()
-
-            for i in buscamarca:
-                self.listaOrcarmentoProduto.insert("", END, values=i)
-
-        elif len(modelo) > 0:
-            self.e_modelo.insert(END, "")
-            modelo = self.e_modelo.get()
-            self.cursor.execute(f"""
-                 SELECT id_produto, produto, marca, modelo, cor, valor_venda FROM 
-                     produto
-                 modelo 
-                     id_produto 
-                 LIKE '%{modelo}%' ORDER BY id_produto ASC; """)
-
-            buscamodelo = self.cursor.fetchall()
-
-            for i in buscamodelo:
-                self.listaOrcarmentoProduto.insert("", END, values=i)
-
-            self.desconecta_bd()
-
-        elif len(cor) > 0:
-            self.e_cor.insert(END, "")
-            cor = self.e_cor.get()
-            self.cursor.execute(f"""
-                 SELECT id_produto, produto, marca, modelo, cor, valor_venda FROM 
-                     produto
-                 WHERE 
-                     cor 
-                 LIKE '%{cor}%' ORDER BY id_produto ASC; """)
-
-            buscacor = self.cursor.fetchall()
-
-            for i in buscacor:
-                self.listaOrcarmentoProduto.insert("", END, values=i)
 
         self.desconecta_bd()
 
@@ -608,29 +548,20 @@ class Funcao():
             pass
         else:
             self.conecta_bd()
-            self.cursor.execute("""
+            self.cursor.execute(f"""
                 UPDATE
                     produto_orcado
                 SET 
-                    id_orcamento = %s,
-                    id_pessoa = %s, 
-                    id_produto = %s, 
-                    quantidade = %s, 
-                    valor_venda = %s, 
-                    defeito = %s, 
-                    observacao = %s,
-                    status_orcamento = %s
+                    id_orcamento = '{self.id_orcamento}',
+                    id_pessoa = '{self.id_pessoa}', 
+                    id_produto = '{self.id_produto}', 
+                    quantidade = '{self.quantidade}', 
+                    valor_venda = '{self.valor}', 
+                    defeito = '{self.defeito}', 
+                    observacao = '{self.observacao}',
+                    status_orcamento = '{self.status_orcamento}'
                 WHERE
-                    cod_orcamento = %s """, (
-                    self.id_orcamento,
-                    self.id_pessoa,
-                    self.id_produto,
-                    self.quantidade,
-                    self.valor,
-                    self.defeito,
-                    self.observacao,
-                    self.status_orcamento,
-                    self.item))
+                    cod_orcamento = {self.item}; """)
 
         messagebox.showinfo(title="Orçamento", message="Orçamento Foi Alterado")
 
@@ -731,20 +662,15 @@ class Funcao():
         self.conecta_bd()
         selecionaNumeroWhatsapp = self.cursor.execute(f""" 
             SELECT whatsapp FROM pessoas WHERE id_pessoa = '{self.e_id_pessoa.get()}'; """)
-
         selecionaNumeroWhatsapp = self.cursor.fetchone()
 
-        self.aviso = kt.sendwhatmsg_instantly(
-            f'+55{selecionaNumeroWhatsapp}',
-            'SEGAT - Sistema Gerenciador de Assistência Técnica Avisa.'
-            'Seu Celular já está Pronto!')
+        self.aviso = kt.sendwhatmsg_instantly(f'+55{selecionaNumeroWhatsapp}', 'SEGAT - Sistema Gerenciador de Assistência Técnica Avisa. Seu Celular já está Pronto!')
         self.conn.commit()
         self.desconecta_bd()
 
     def vender(self):
         orcamento.destroy()
         call(["python", "Tela_Venda.py"])
-
 
 class Aplicacao_Orcamento(Funcao, Relatorio):
     def __init__(self):

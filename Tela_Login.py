@@ -13,6 +13,13 @@ from tkcalendar import Calendar, DateEntry
 import win32
 
 
+
+
+"""
+
+"""
+
+
 try:
     from Tkinter import *
 except ImportError:
@@ -32,11 +39,14 @@ co2 = "#403d3d"  # letra
 co3 = "#333333"  # azul escuro / fundo da tela / fundo dos label
 co4 = "#666666"  # roxo claro / fundo do frame
 co5 = "#759fe6"  # cor da borda - highlightbackground
-co6 = "#A8A8A8"  # em uso = cinza  fundo dos labels e do frame
+
 co7 = "#6aabb5"  # Botão Adicionar
 co8 = "#ffff99"  # Botão Alterar
+
 co9 = "orange"  # em uso = laranja botão excluir
+co6 = "#A8A8A8"  # em uso = cinza  fundo dos labels e do frame
 co10 = "Black" # em uso = cor da fonte
+
 TelaDeLogin = Tk()
 
 logo = PhotoImage(file="C:/Users/Edinho/PycharmProjects/Meu_TCC/Logo/Segat_Logo.png")

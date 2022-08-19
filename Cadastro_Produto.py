@@ -22,10 +22,12 @@ co2 = "#403d3d"  # letra
 co3 = "#333333"  # azul escuro / fundo da tela / fundo dos label
 co4 = "#666666"  # roxo claro / fundo do frame
 co5 = "#759fe6"  # cor da borda - highlightbackground
-co6 = "#A8A8A8"  # em uso = cinza  fundo dos labels e do frame
 co7 = "#6aabb5"  # Botão Adicionar
 co8 = "#ffff99"  # Botão Alterar
+
+
 co9 = "orange"  # em uso = laranja botão excluir
+co6 = "#A8A8A8"  # em uso = cinza  fundo dos labels e do frame
 co10 = "Black" # em uso = cor da fonte
 co11 = "white" # em uso no fundo do grid
 
@@ -87,7 +89,7 @@ class Funcao():
             messagebox.showerror(title="Cadastro de Produto", message="Campos Vazios")
         else:
             self.conecta_bd()
-            self.cursor.execute("""
+            self.cursor.execute(f"""
                 INSERT INTO
                     produto (
                         produto, 
@@ -98,14 +100,13 @@ class Funcao():
                         valor_venda, 
                         estoque) 
                 VALUES 
-                        (%s, %s, %s, %s, %s, %s, %s);""", (
-                        self.produto,
-                        self.marca,
-                        self.modelo,
-                        self.cor,
-                        self.valor_compra,
-                        self.valor_venda,
-                        self.estoque))
+                        ('{self.produto}',
+                        '{self.marca}',
+                        '{self.modelo}',
+                        '{self.cor}',
+                        '{self.valor_compra}',
+                        '{self.valor_venda}',
+                        '{self.estoque}'); """)
 
             messagebox.showinfo(title="Cadastrado de Produto", message="Produto Cadastro com Sucesso")
 
@@ -147,7 +148,7 @@ class Funcao():
             DELETE FROM 
                 produto 
             WHERE
-                id_produto = %s """, (self.id_produto,))
+                id_produto = '{self.id_produto}'; """)
 
         messagebox.showinfo(title="Cadastrado de Produto", message="Produto Excluído")
 
@@ -159,27 +160,19 @@ class Funcao():
     def altera_Produto(self):
         self.produtos_Variaveis()
         self.conecta_bd()
-        self.cursor.execute("""
+        self.cursor.execute(f"""
             UPDATE 
                 produto
             SET 
-                produto = %s, 
-                marca = %s, 
-                modelo = %s, 
-                cor = %s, 
-                valor_compra = %s, 
-                valor_venda = %s, 
-                estoque = %s 
+                produto = '{self.produto}', 
+                marca = '{self.marca}', 
+                modelo = '{self.modelo}', 
+                cor = '{self.cor}', 
+                valor_compra = '{self.valor_compra}', 
+                valor_venda = '{self.valor_venda}', 
+                estoque = '{self.estoque}' 
             WHERE 
-                id_produto = %s""", (
-                self.produto,
-                self.marca,
-                self.modelo,
-                self.cor,
-                self.valor_compra,
-                self.valor_venda,
-                self.estoque,
-                self.id_produto))
+                id_produto = {self.id_produto}; """)
 
         messagebox.showinfo(title="Cadastrado de Produto", message="Produto Alterado")
 
@@ -209,7 +202,7 @@ class Funcao():
                 AND modelo LIKE '%{modelo}%'
                 AND cor LIKE '%{cor}%'
                 AND estoque LIKE '{estoque}%'
-                ORDER BY id_produto;""")
+                ORDER BY id_produto; """)
 
             buscaproduto = self.cursor.fetchall()
 

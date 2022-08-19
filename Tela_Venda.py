@@ -21,11 +21,11 @@ co8 = "#ffff99"  # Botão Alterar
 co9 = "#d54c4a"  # botão excluir
 co10 = "white"
 
-# - - Tela de Vendas - -
+# - - janela Cadastro de Pessoas - -
 
 venda = Tk()
 
-logo = PhotoImage(file="C:/Users/Edinho/PycharmProjects/Meu_TCC/Logo/Obrigado.png")
+logo = PhotoImage(file="C:/Users/Edinho/PycharmProjects/Meu_TCC/Logo/Obrigaado-removebg-preview.png")
 
 class Aplicacao_Venda():
     def __init__(self):

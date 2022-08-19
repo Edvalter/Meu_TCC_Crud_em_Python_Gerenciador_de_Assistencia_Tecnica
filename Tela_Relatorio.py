@@ -30,10 +30,12 @@ co2 = "#403d3d"  # letra
 co3 = "#333333"  # azul escuro / fundo da tela / fundo dos label
 co4 = "#666666"  # roxo claro / fundo do frame
 co5 = "#759fe6"  # cor da borda - highlightbackground
-co6 = "#A8A8A8"  # em uso = cinza  fundo dos labels e do frame
 co7 = "#6aabb5"  # Botão Adicionar
 co8 = "#ffff99"  # Botão Alterar
+
+
 co9 = "orange"  # em uso = laranja botão excluir
+co6 = "#A8A8A8"  # em uso = cinza  fundo dos labels e do frame
 co10 = "Black" # em uso = cor da fonte
 co11 = "white" # em uso no fundo do grid
 
@@ -74,7 +76,7 @@ class RelatorioClientes(Conexao):
         self.relatorioListaCliente.drawString(150, 795, 'Endereço: R: Quênia 94')
         self.relatorioListaCliente.drawString(150, 780, 'Centro - Timbó - SC')
         self.relatorioListaCliente.drawString(150, 765, 'CNPJ: 12.123.12.0001/23')
-        self.relatorioListaCliente.drawString(150, 750, 'Telefone / WhatsApp: XXXXX')
+        self.relatorioListaCliente.drawString(150, 750, 'Telefone / WhatsApp: (47) 9 9247 9998')
 
         # - - Titulo do Relatório- - - -
         self.relatorioListaCliente.setFont("Helvetica-Bold", 15)
@@ -120,7 +122,7 @@ class RelatorioProdutos(Conexao):
         self.relatorioListaProduto.drawString(150, 795, 'Endereço: R: Quênia 94')
         self.relatorioListaProduto.drawString(150, 780, 'Centro - Timbó - SC')
         self.relatorioListaProduto.drawString(150, 765, 'CNPJ: 12.123.12.0001/23')
-        self.relatorioListaProduto.drawString(150, 750, 'Telefone / WhatsApp: XXXXX')
+        self.relatorioListaProduto.drawString(150, 750, 'Telefone / WhatsApp: (47) 9 9247 9998')
 
         # - - Titulo do Relatório- - - -
         self.relatorioListaProduto.setFont("Helvetica-Bold", 15)
@@ -184,7 +186,7 @@ class RelatorioOrcamentos(Conexao):
         self.relatorioListaOrcamento.drawString(150, 795, 'Endereço: R: Quênia 94')
         self.relatorioListaOrcamento.drawString(150, 780, 'Centro - Timbó - SC')
         self.relatorioListaOrcamento.drawString(150, 765, 'CNPJ: 12.123.12.0001/23')
-        self.relatorioListaOrcamento.drawString(150, 750, 'Telefone / WhatsApp: XXXXX')
+        self.relatorioListaOrcamento.drawString(150, 750, 'Telefone / WhatsApp: (47) 9 9247 9998')
 
         # - - Titulo do Relatório- - - -
         self.relatorioListaOrcamento.setFont("Helvetica-Bold", 15)
@@ -264,7 +266,7 @@ class Pessoas(RelatorioClientes, Conexao):
     def selecionaCliente(self):
         self.listapessoas.delete(*self.listapessoas.get_children())
         self.conecta_bd()
-        listaPe = self.cursor.execute("""
+        listaPe = self.cursor.execute(f"""
              SELECT * FROM pessoas ORDER BY id_pessoa ASC; """)
 
         listaPe = self.cursor.fetchall()
@@ -350,8 +352,10 @@ class Produtos(RelatorioProdutos, Conexao):
     def selecionaProduto(self):
         self.conecta_bd()
         self.listaproduto.delete(*self.listaproduto.get_children())
-        lista = self.cursor.execute("""
-            SELECT id_produto, produto, marca, modelo, cor, estoque  FROM 
+        lista = self.cursor.execute(f"""
+            SELECT 
+                id_produto, produto, marca, modelo, cor, estoque  
+            FROM 
                 produto 
             ORDER BY 
                 id_produto 
@@ -381,14 +385,10 @@ class Produtos(RelatorioProdutos, Conexao):
                     produto
                 WHERE 
                     produto 
-                LIKE '%{produto}%' 
-                    AND marca 
-                LIKE '%{marca}%'
-                    AND modelo 
-                LIKE '%{modelo}%'
-                    AND cor 
-                LIKE '%{cor}%'
-                    and estoque 
+                LIKE '%{produto}%' AND marca 
+                LIKE '%{marca}%' AND modelo 
+                LIKE '%{modelo}%' AND cor 
+                LIKE '%{cor}%' AND estoque 
                 LIKE '{estoque}%'
                 ORDER BY id_produto;""")
 
@@ -426,7 +426,7 @@ class Orcamento(Conexao):
             INNER JOIN PESSOAS PESSOA ON PESSOA.ID_PESSOA = PRODUTO_ORC.ID_PESSOA
             INNER JOIN PRODUTO PRODUTO ON PRODUTO.ID_PRODUTO = PRODUTO_ORC.ID_PRODUTO
             INNER JOIN ORCAMENTO ORC ON ORC.ID_ORCAMENTO = PRODUTO_ORC.ID_ORCAMENTO
-            WHERE PRODUTO_ORC.STATUS_ORCAMENTO = 'Orçamento';""")
+            WHERE PRODUTO_ORC.STATUS_ORCAMENTO = 'Orçamento'; """)
 
         listaData = self.cursor.fetchall()
 
@@ -678,7 +678,7 @@ class Aplicacao_Relatorios(Pessoas, Produtos, RelatorioClientes, RelatorioProdut
 
 # - - - Grid Produtos - - -
     def grid_Produtos(self):
-        self.listaproduto = ttk.Treeview(self.abaProduto, columns=("col0", "col1", "col2", "col3", "col4", "col5", "col6"))
+        self.listaproduto = ttk.Treeview(self.abaProduto, columns=("col0", "col1", "col2", "col3", "col4", "col5", "col6",))
         self.listaproduto.heading("#0", text="")
         self.listaproduto.heading("#1", text="Código")
         self.listaproduto.heading("#2", text="Produto")

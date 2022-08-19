@@ -1,6 +1,4 @@
-"""
 
-"""
 import os
 import pickle
 import sys
@@ -25,12 +23,10 @@ co2 = "#403d3d"  # letra
 co3 = "#333333"  # azul escuro / fundo da tela / fundo dos label
 co4 = "#666666"  # roxo claro / fundo do frame
 co5 = "#759fe6"  # cor da borda - highlightbackground
-
+co6 = "#A8A8A8"  # em uso = cinza  fundo dos labels e do frame
 co7 = "#6aabb5"  # Botão Adicionar
 co8 = "#ffff99"  # Botão Alterar
-
 co9 = "orange"  # em uso = laranja botão excluir
-co6 = "#A8A8A8"  # em uso = cinza  fundo dos labels e do frame
 co10 = "Black" # em uso = cor da fonte
 
 
@@ -67,25 +63,24 @@ class Funcao_Pessoas():
     def monta_Tabela_Pessoas(self):
         self.conecta_bd()
         self.cursor.execute("""
-                CREATE TABLE IF NOT EXISTS pessoas(
-                    id_pessoa INTEGER AUTO_INCREMENT,
-                    cpf VARCHAR(100),
-                    nome VARCHAR(100),
-                    telefone VARCHAR(100),
-                    whatsapp VARCHAR(100),
-                    email VARCHAR(100),
-                    cep VARCHAR(100),
-                    rua VARCHAR(100),
-                    numero INTEGER,
-                    bairro VARCHAR(100),
-                    cidade VARCHAR(100),
-                    estado VARCHAR(100),
-                    observacoes VARCHAR(200),
-                    statuspessoa VARCHAR(100),
-                    data_cadastro DATE,
-                PRIMARY KEY (id_pessoa)
-            );
-        """)
+            CREATE TABLE IF NOT EXISTS pessoas(
+                id_pessoa INTEGER AUTO_INCREMENT,
+                cpf VARCHAR(100),
+                nome VARCHAR(100),
+                telefone VARCHAR(100),
+                whatsapp VARCHAR(100),
+                email VARCHAR(100),
+                cep VARCHAR(100),
+                rua VARCHAR(100),
+                numero INTEGER,
+                bairro VARCHAR(100),
+                cidade VARCHAR(100),
+                estado VARCHAR(100),
+                observacoes VARCHAR(200),
+                statuspessoa VARCHAR(100),
+                data_cadastro DATE,
+            PRIMARY KEY (id_pessoa));
+            """)
         self.conn.commit()
         self.desconecta_bd()
 
@@ -121,7 +116,7 @@ class Funcao_Pessoas():
             pass
         else:
             self.conecta_bd()
-            self.cursor.execute("""
+            self.cursor.execute(f"""
                 INSERT INTO 
                     pessoas( 
                         cpf, 
@@ -138,21 +133,21 @@ class Funcao_Pessoas():
                         observacoes,
                         status_pessoa, 
                         data_cadastro) 
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""", (
-                         self.cpf,
-                         self.nome,
-                         self.telefone,
-                         self.whatsapp,
-                         self.email,
-                         self.cep,
-                         self.rua,
-                         self.numero,
-                         self.bairro,
-                         self.cidade,
-                         self.estado,
-                         self.observacoes,
-                         self.status_pessoa,
-                         self.dataConvertida))
+                VALUES 
+                         ('{self.cpf}',
+                        '{self.nome}',
+                        '{self.telefone}',
+                        '{self.whatsapp}',
+                        '{self.email}',
+                        '{self.cep}',
+                        '{self.rua}',
+                        '{self.numero}',
+                        '{self.bairro}',
+                        '{self.cidade}',
+                        '{self.estado}',
+                        '{self.observacoes}',
+                        '{self.status_pessoa}',
+                        '{self.dataConvertida}'); """)
 
             messagebox.showinfo(title="Cadastro de Pessoas", message="Cadastro realizado com sucesso")
 
@@ -164,7 +159,7 @@ class Funcao_Pessoas():
     def select_Pessoa(self):
         self.listapessoas.delete(*self.listapessoas.get_children())
         self.conecta_bd()
-        listaPe = self.cursor.execute("""
+        listaPe = self.cursor.execute(f"""
             SELECT * FROM pessoas ORDER BY id_pessoa ASC; """)
 
         listaPe = self.cursor.fetchall()
@@ -201,12 +196,11 @@ class Funcao_Pessoas():
     def deleta_Pessoa(self):
         self.pessoas_Variaveis()
         self.conecta_bd()
-        self.cursor.execute("""
+        self.cursor.execute(f"""
             DELETE FROM 
                 pessoas 
             WHERE 
-                id_pessoa = %s """, (
-                self.id_pessoa,))
+                id_pessoa = '{self.id_pessoa}'; """)
 
         messagebox.showinfo(title="Cadastro de Pessoas", message="Cadastro Excluído com sucesso")
 
@@ -215,47 +209,33 @@ class Funcao_Pessoas():
         self.limpa_Tela_Pessoas()
         self.select_Pessoa()
 
+
     def altera_Pessoa(self):
         self.pessoas_Variaveis()
         if self.id_pessoa == '':
             pass
         else:
             self.conecta_bd()
-            self.cursor.execute("""
+            self.cursor.execute(f"""
                 UPDATE
                     pessoas
                 SET
-                    cpf = %s,
-                    nome = %s,
-                    telefone = %s,
-                    whatsapp = %s,
-                    email = %s,
-                    cep = %s,
-                    rua = %s,
-                    numero = %s,
-                    bairro = %s,
-                    cidade = %s,
-                    estado = %s,
-                    observacoes = %s,
-                    status_pessoa = %s,
-                    data_cadastro = %s 
+                    cpf = '{self.cpf}',
+                    nome = '{self.nome}',
+                    telefone = '{self.telefone}',
+                    whatsapp = '{self.whatsapp}',
+                    email = '{self.email}',
+                    cep = '{self.cep}',
+                    rua = '{self.rua}',
+                    numero = '{self.numero}',
+                    bairro = '{self.bairro}',
+                    cidade = '{self.cidade}',
+                    estado = '{self.estado}',
+                    observacoes = '{self.observacoes}',
+                    status_pessoa = '{self.status_pessoa}',
+                    data_cadastro = '{self.dataConvertida}'
                 WHERE
-                    id_pessoa = %s""",
-                    (self.cpf,
-                     self.nome,
-                     self.telefone,
-                     self.whatsapp,
-                     self.email,
-                     self.cep,
-                     self.rua,
-                     self.numero,
-                     self.bairro,
-                     self.cidade,
-                     self.estado,
-                     self.observacoes,
-                     self.status_pessoa,
-                     self.dataConvertida,
-                     self.id_pessoa))
+                    id_pessoa = {self.id_pessoa}; """)
 
             messagebox.showinfo(title="Cadastro de Pessoas", message="Cadastro Alterado com Sucesso")
 
@@ -278,11 +258,11 @@ class Funcao_Pessoas():
             self.e_cpf.insert(END, "")
             cpf = self.e_cpf.get()
             self.cursor.execute(f"""
-                   SELECT * FROM  
-                       pessoas 
-                   WHERE 
-                       cpf 
-                   LIKE '%{cpf}%' ORDER BY id_pessoa ASC; """)
+               SELECT * FROM  
+                   pessoas 
+               WHERE 
+                   cpf 
+               LIKE '%{cpf}%' ORDER BY id_pessoa ASC; """)
 
             buscacpf = self.cursor.fetchall()
 
@@ -294,11 +274,11 @@ class Funcao_Pessoas():
             self.e_nome.insert(END, "")
             nome = self.e_nome.get()
             self.cursor.execute(f"""
-                   SELECT * FROM  
-                       pessoas 
-                   WHERE 
-                       nome 
-                   LIKE '%{nome}%' ORDER BY id_pessoa ASC; """)
+               SELECT * FROM  
+                   pessoas 
+               WHERE 
+                   nome 
+               LIKE '%{nome}%' ORDER BY id_pessoa ASC; """)
 
             buscanome = self.cursor.fetchall()
 
@@ -310,11 +290,11 @@ class Funcao_Pessoas():
             self.e_id_pessoa.insert(END, "")
             id_pessoa = self.e_id_pessoa.get()
             self.cursor.execute(f"""
-                   SELECT * FROM  
-                       pessoas 
-                   WHERE 
-                       id_pessoa 
-                   LIKE '%{id_pessoa}%' ORDER BY id_pessoa ASC; """)
+               SELECT * FROM  
+                   pessoas 
+               WHERE 
+                   id_pessoa 
+               LIKE '%{id_pessoa}%' ORDER BY id_pessoa ASC; """)
 
             buscaid_pessoas = self.cursor.fetchall()
 
@@ -326,11 +306,11 @@ class Funcao_Pessoas():
             self.e_telefone.insert(END, "")
             telefone = self.e_telefone.get()
             self.cursor.execute(f"""
-                   SELECT * FROM  
-                       pessoas 
-                   WHERE 
-                       telefone 
-                   LIKE '%{telefone}%' ORDER BY id_pessoa ASC; """)
+               SELECT * FROM  
+                   pessoas 
+               WHERE 
+                   telefone 
+               LIKE '%{telefone}%' ORDER BY id_pessoa ASC; """)
 
             buscatelefone = self.cursor.fetchall()
 
@@ -342,11 +322,11 @@ class Funcao_Pessoas():
             self.e_whatsapp.insert(END, "")
             whatsapp = self.e_whatsapp.get()
             self.cursor.execute(f"""
-                   SELECT * FROM  
-                       pessoas 
-                   WHERE 
-                       whatsapp 
-                   LIKE '%{whatsapp}%' ORDER BY id_pessoa ASC; """)
+               SELECT * FROM  
+                   pessoas 
+               WHERE 
+                   whatsapp 
+               LIKE '%{whatsapp}%' ORDER BY id_pessoa ASC; """)
 
             buscawhatsapp = self.cursor.fetchall()
 
@@ -358,11 +338,11 @@ class Funcao_Pessoas():
             self.e_email.insert(END, "")
             email = self.e_email.get()
             self.cursor.execute(f"""
-                   SELECT * FROM  
-                       pessoas 
-                   WHERE 
-                       email 
-                   LIKE '%{email}%' ORDER BY id_pessoa ASC; """)
+               SELECT * FROM  
+                   pessoas 
+               WHERE 
+                   email 
+               LIKE '%{email}%' ORDER BY id_pessoa ASC; """)
             buscaemail = self.cursor.fetchall()
 
             for i in buscaemail:

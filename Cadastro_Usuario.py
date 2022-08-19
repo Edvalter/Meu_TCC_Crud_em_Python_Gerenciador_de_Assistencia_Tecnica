@@ -176,23 +176,17 @@ class Funcao():
             pass
         else:
             self.conecta_bd()
-            self.cursor.execute("""
+            self.cursor.execute(f"""
                 UPDATE 
                     funcionario 
                 SET 
-                    id_pessoa = %s, 
-                    nome = %s, 
-                    login = %s, 
-                    senha = %s,
-                    confirmar_senha = %s
+                    id_pessoa = '{self.id_pessoa}', 
+                    nome = '{self.nome}', 
+                    login = '{self.login}', 
+                    senha = '{self.senha}',
+                    confirmar_senha = '{self.confirmar_senha}'
                 WHERE
-                    id_funcionario = %s""", (
-                    self.id_pessoa,
-                    self.nome,
-                    self.login,
-                    self.senha,
-                    self.confirmar_senha,
-                    self.id_funcionario))
+                    id_funcionario = {self.id_funcionario}; """)
 
             messagebox.showinfo(title="Cadastrado de Funcionário", message="Login do Funcionário Alterado com Sucesso")
 
